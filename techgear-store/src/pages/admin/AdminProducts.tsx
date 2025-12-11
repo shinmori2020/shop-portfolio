@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { collection, getDocs, deleteDoc, doc, updateDoc, addDoc, query, where } from 'firebase/firestore';
-import { db } from '../../lib/firebase';
+import { db, storage } from '../../lib/firebase';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { Button } from '../../components/atoms/Button';
 import './AdminProducts.css';
 
@@ -38,6 +39,9 @@ export const AdminProducts: React.FC = () => {
     sku: '',
     isPublished: false,
   });
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string>('');
+  const [uploadingImage, setUploadingImage] = useState(false);
 
   useEffect(() => {
     checkAdminAndLoadProducts();
@@ -88,12 +92,63 @@ export const AdminProducts: React.FC = () => {
     }
   };
 
+  const handleImageUpload = async (): Promise<string | null> => {
+    if (!imageFile || !storage) return null;
+
+    setUploadingImage(true);
+    try {
+      // ファイル名を一意にするためタイムスタンプを追加
+      const fileName = `products/${Date.now()}_${imageFile.name}`;
+      const storageRef = ref(storage, fileName);
+
+      // 画像をアップロード
+      const snapshot = await uploadBytes(storageRef, imageFile);
+
+      // ダウンロードURLを取得
+      const downloadURL = await getDownloadURL(snapshot.ref);
+      return downloadURL;
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      alert('画像のアップロードに失敗しました');
+      return null;
+    } finally {
+      setUploadingImage(false);
+    }
+  };
+
+  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      // 画像ファイルのバリデーション
+      if (!file.type.startsWith('image/')) {
+        alert('画像ファイルを選択してください');
+        return;
+      }
+
+      // 5MB以下のファイルサイズ制限
+      if (file.size > 5 * 1024 * 1024) {
+        alert('ファイルサイズは5MB以下にしてください');
+        return;
+      }
+
+      setImageFile(file);
+
+      // プレビュー表示
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const handleAddProduct = async () => {
     if (!db) return;
 
     try {
       await addDoc(collection(db, 'products'), {
         ...formData,
+        imageUrl: formData.images[0], // 互換性のため両方保存
         price: Number(formData.price),
         stock: Number(formData.stock),
         createdAt: new Date(),
@@ -115,6 +170,7 @@ export const AdminProducts: React.FC = () => {
     try {
       await updateDoc(doc(db, 'products', editingProduct.id), {
         ...formData,
+        imageUrl: formData.images[0], // 互換性のため両方保存
         price: Number(formData.price),
         stock: Number(formData.stock),
         updatedAt: new Date(),
@@ -170,6 +226,8 @@ export const AdminProducts: React.FC = () => {
       sku: '',
       isPublished: false,
     });
+    setImageFile(null);
+    setImagePreview('');
   };
 
   const openEditModal = (product: Product) => {
@@ -184,6 +242,11 @@ export const AdminProducts: React.FC = () => {
       sku: product.sku,
       isPublished: product.isPublished,
     });
+    // 編集時は既存画像をプレビューに表示
+    if (product.images && product.images[0]) {
+      setImagePreview(product.images[0]);
+    }
+    setImageFile(null);
   };
 
   if (loading) {
@@ -355,6 +418,9 @@ export const AdminProducts: React.FC = () => {
                   onChange={(e) => setFormData({ ...formData, images: [e.target.value] })}
                   placeholder="https://example.com/image.jpg"
                 />
+                <p style={{ fontSize: '12px', color: '#666', marginTop: '5px' }}>
+                  画像のURLを入力してください（例: https://via.placeholder.com/300x300）
+                </p>
               </div>
 
               <div className="admin-products__form-group">
@@ -381,8 +447,9 @@ export const AdminProducts: React.FC = () => {
                 </Button>
                 <Button
                   onClick={editingProduct ? handleUpdateProduct : handleAddProduct}
+                  disabled={uploadingImage}
                 >
-                  {editingProduct ? '更新' : '追加'}
+                  {uploadingImage ? 'アップロード中...' : editingProduct ? '更新' : '追加'}
                 </Button>
               </div>
             </div>

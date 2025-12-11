@@ -1,21 +1,87 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { collection, getDocs, query, where, orderBy, limit } from 'firebase/firestore';
+import { db } from '../../lib/firebase';
 import { ProductCard } from '../../components/molecules/ProductCard';
 import { Button } from '../../components/atoms/Button';
-import { sampleProducts } from '../../data/products';
+import { Product } from '../../types';
 import './Home.css';
 
 export const Home: React.FC = () => {
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(true);
+  const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
+  const [newProducts, setNewProducts] = useState<Product[]>([]);
+  const [saleProducts, setSaleProducts] = useState<Product[]>([]);
 
-  // Featured商品のみ表示
-  const featuredProducts = sampleProducts.filter(p => p.featured).slice(0, 3);
+  useEffect(() => {
+    const fetchProducts = async () => {
+      if (!db) {
+        setLoading(false);
+        return;
+      }
 
-  // 新着商品
-  const newProducts = sampleProducts.filter(p => p.isNew).slice(0, 3);
+      try {
+        // Featured商品を取得
+        const featuredQuery = query(
+          collection(db, 'products'),
+          where('featured', '==', true),
+          limit(3)
+        );
+        const featuredSnapshot = await getDocs(featuredQuery);
+        const featuredData: Product[] = [];
+        featuredSnapshot.forEach((doc) => {
+          const data = doc.data();
+          featuredData.push({
+            id: doc.id,
+            ...data
+          } as Product);
+        });
+        setFeaturedProducts(featuredData);
 
-  // セール商品
-  const saleProducts = sampleProducts.filter(p => p.onSale).slice(0, 3);
+        // 新着商品を取得（作成日順）
+        const newQuery = query(
+          collection(db, 'products'),
+          orderBy('createdAt', 'desc'),
+          limit(3)
+        );
+        const newSnapshot = await getDocs(newQuery);
+        const newData: Product[] = [];
+        newSnapshot.forEach((doc) => {
+          const data = doc.data();
+          newData.push({
+            id: doc.id,
+            ...data
+          } as Product);
+        });
+        setNewProducts(newData);
+
+        // セール商品を取得
+        const saleQuery = query(
+          collection(db, 'products'),
+          where('onSale', '==', true),
+          limit(3)
+        );
+        const saleSnapshot = await getDocs(saleQuery);
+        const saleData: Product[] = [];
+        saleSnapshot.forEach((doc) => {
+          const data = doc.data();
+          saleData.push({
+            id: doc.id,
+            ...data
+          } as Product);
+        });
+        setSaleProducts(saleData);
+
+      } catch (error) {
+        console.error('Error fetching products:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, []);
 
   const handleProductClick = (productId: string) => {
     navigate(`/products/${productId}`);
@@ -24,6 +90,16 @@ export const Home: React.FC = () => {
   const handleViewAllProducts = () => {
     navigate('/products');
   };
+
+  if (loading) {
+    return (
+      <div className="home">
+        <div className="home__loading">
+          <p>読み込み中...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="home">

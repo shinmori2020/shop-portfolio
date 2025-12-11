@@ -2,33 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { collection, query, where, orderBy, getDocs } from 'firebase/firestore';
 import { db } from '../lib/firebase';
+import { Order } from '../types';
 import './Orders.css';
-
-interface OrderItem {
-  productId: string;
-  name: string;
-  price: number;
-  quantity: number;
-  image: string;
-}
-
-interface Order {
-  id: string;
-  userId: string;
-  items: OrderItem[];
-  totalAmount: number;
-  status: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
-  createdAt: Date;
-  shippingAddress: {
-    name: string;
-    email: string;
-    postalCode: string;
-    prefecture: string;
-    city: string;
-    address: string;
-    phone: string;
-  };
-}
 
 export const Orders: React.FC = () => {
   const { user } = useAuth();
@@ -65,13 +40,10 @@ export const Orders: React.FC = () => {
           const data = doc.data();
           ordersData.push({
             id: doc.id,
-            userId: data.userId,
-            items: data.items,
-            totalAmount: data.totalAmount,
-            status: data.status,
-            createdAt: data.createdAt?.toDate() || new Date(),
-            shippingAddress: data.shippingAddress,
-          });
+            ...data,
+            createdAt: data.createdAt?.toDate ? data.createdAt.toDate() : data.createdAt,
+            updatedAt: data.updatedAt?.toDate ? data.updatedAt.toDate() : data.updatedAt,
+          } as Order);
         });
 
         setOrders(ordersData);
@@ -86,9 +58,10 @@ export const Orders: React.FC = () => {
     fetchOrders();
   }, [user]);
 
-  const getStatusText = (status: Order['status']) => {
+  const getStatusText = (status: Order['orderStatus']) => {
     const statusMap = {
       pending: '注文確認中',
+      confirmed: '確認済み',
       processing: '処理中',
       shipped: '発送済み',
       delivered: '配達完了',
@@ -97,7 +70,7 @@ export const Orders: React.FC = () => {
     return statusMap[status] || status;
   };
 
-  const getStatusClass = (status: Order['status']) => {
+  const getStatusClass = (status: Order['orderStatus']) => {
     return `orders__status orders__status--${status}`;
   };
 
@@ -147,12 +120,14 @@ export const Orders: React.FC = () => {
                 <div className="orders__header">
                   <div className="orders__info">
                     <p className="orders__date">
-                      注文日: {order.createdAt.toLocaleDateString('ja-JP')}
+                      注文日: {order.createdAt instanceof Date ?
+                        order.createdAt.toLocaleDateString('ja-JP') :
+                        new Date(order.createdAt.seconds * 1000).toLocaleDateString('ja-JP')}
                     </p>
-                    <p className="orders__id">注文番号: {order.id}</p>
+                    <p className="orders__id">注文番号: {order.orderNumber}</p>
                   </div>
-                  <span className={getStatusClass(order.status)}>
-                    {getStatusText(order.status)}
+                  <span className={getStatusClass(order.orderStatus)}>
+                    {getStatusText(order.orderStatus)}
                   </span>
                 </div>
 
@@ -160,12 +135,12 @@ export const Orders: React.FC = () => {
                   {order.items.map((item, index) => (
                     <div key={index} className="orders__product">
                       <img
-                        src={item.image}
-                        alt={item.name}
+                        src={item.productImage || '/placeholder.png'}
+                        alt={item.productName}
                         className="orders__product-image"
                       />
                       <div className="orders__product-info">
-                        <h3 className="orders__product-name">{item.name}</h3>
+                        <h3 className="orders__product-name">{item.productName}</h3>
                         <p className="orders__product-quantity">数量: {item.quantity}</p>
                       </div>
                       <p className="orders__product-price">
@@ -177,7 +152,7 @@ export const Orders: React.FC = () => {
 
                 <div className="orders__footer">
                   <p className="orders__total">
-                    合計: ¥{order.totalAmount.toLocaleString()}
+                    合計: ¥{order.total.toLocaleString()}
                   </p>
                 </div>
               </div>

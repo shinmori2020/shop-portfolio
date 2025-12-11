@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
 import { Header } from './components/layouts/Header';
@@ -22,6 +22,26 @@ import { AdminSettings } from './pages/admin/AdminSettings';
 import './App.css';
 
 function App() {
+  useEffect(() => {
+    // localStorage内のカートデータをチェック
+    const cartData = localStorage.getItem('cart-storage');
+    if (cartData) {
+      try {
+        const parsed = JSON.parse(cartData);
+        // バージョンチェック：古いデータ形式の場合はクリア
+        if (parsed.version !== 0) {
+          // zustandのpersistのバージョンと一致しない場合はクリア
+          console.log('Clearing old cart data format');
+          localStorage.removeItem('cart-storage');
+          window.location.reload();
+        }
+      } catch (error) {
+        console.error('Invalid cart data, clearing...', error);
+        localStorage.removeItem('cart-storage');
+        window.location.reload();
+      }
+    }
+  }, []);
   return (
     <Router>
       <AuthProvider>

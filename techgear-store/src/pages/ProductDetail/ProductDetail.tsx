@@ -1,8 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { doc, getDoc } from 'firebase/firestore';
+import { db } from '../../lib/firebase';
 import { Button } from '../../components/atoms/Button';
 import { useCartStore } from '../../store/useCartStore';
-import { sampleProducts } from '../../data/products';
+import { Product } from '../../types';
 import './ProductDetail.css';
 
 export const ProductDetail: React.FC = () => {
@@ -10,10 +12,63 @@ export const ProductDetail: React.FC = () => {
   const navigate = useNavigate();
   const addItem = useCartStore((state) => state.addItem);
 
+  const [product, setProduct] = useState<Product | null>(null);
+  const [loading, setLoading] = useState(true);
   const [quantity, setQuantity] = useState(1);
   const [selectedImage, setSelectedImage] = useState(0);
 
-  const product = sampleProducts.find(p => p.id === productId);
+  // Firestoreから商品データを取得
+  useEffect(() => {
+    const fetchProduct = async () => {
+      if (!db || !productId) {
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const productDoc = await getDoc(doc(db, 'products', productId));
+
+        if (productDoc.exists()) {
+          const data = productDoc.data();
+          setProduct({
+            id: productDoc.id,
+            name: data.name,
+            description: data.description,
+            price: data.price,
+            salePrice: data.salePrice,
+            category: data.category,
+            imageUrl: data.imageUrl || '/placeholder-product.svg',
+            images: data.images || [data.imageUrl || '/placeholder-product.svg'],
+            stock: data.stock,
+            featured: data.featured || false,
+            onSale: data.onSale || false,
+            isNew: data.isNew || false,
+            brand: data.brand,
+            rating: data.rating || 0,
+            reviewCount: data.reviewCount || 0,
+            createdAt: data.createdAt,
+            updatedAt: data.updatedAt
+          } as Product);
+        }
+      } catch (error) {
+        console.error('Error fetching product:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProduct();
+  }, [productId]);
+
+  if (loading) {
+    return (
+      <div className="product-detail">
+        <div className="product-detail__loading">
+          <p>商品を読み込み中...</p>
+        </div>
+      </div>
+    );
+  }
 
   if (!product) {
     return (

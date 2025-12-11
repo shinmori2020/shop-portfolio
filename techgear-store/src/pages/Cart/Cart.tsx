@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '../../components/atoms/Button';
 import { useCartStore } from '../../store/useCartStore';
@@ -7,6 +7,23 @@ import './Cart.css';
 export const Cart: React.FC = () => {
   const navigate = useNavigate();
   const { items, removeItem, updateQuantity, clearCart, getTotalPrice } = useCartStore();
+
+  // カートアイテムのバリデーション
+  useEffect(() => {
+    // 無効なアイテムをチェック
+    items.forEach(item => {
+      if (!item?.product?.id || typeof item?.product?.price !== 'number') {
+        console.warn('Invalid cart item detected:', item);
+      }
+    });
+  }, [items]);
+
+  // 有効なアイテムのみフィルタリング
+  const validItems = items.filter(item =>
+    item?.product?.id &&
+    typeof item?.product?.price === 'number' &&
+    typeof item?.quantity === 'number'
+  );
 
   const totalPrice = getTotalPrice();
   const shippingFee = totalPrice >= 5000 ? 0 : 500;
@@ -38,7 +55,7 @@ export const Cart: React.FC = () => {
     navigate('/checkout');
   };
 
-  if (items.length === 0) {
+  if (validItems.length === 0) {
     return (
       <div className="cart">
         <div className="cart__empty">
@@ -65,11 +82,11 @@ export const Cart: React.FC = () => {
         <div className="cart__content">
           {/* カート商品リスト */}
           <div className="cart__items">
-            {items.map((item) => (
-              <div key={item.id} className="cart-item">
+            {validItems.map((item) => (
+              <div key={item.product.id} className="cart-item">
                 <div className="cart-item__image-wrapper">
                   <img
-                    src={item.product.mainImage}
+                    src={item.product.imageUrl || item.product.images?.[0] || '/placeholder-product.svg'}
                     alt={item.product.name}
                     className="cart-item__image"
                     onClick={() => navigate(`/products/${item.product.id}`)}
@@ -118,7 +135,7 @@ export const Cart: React.FC = () => {
                     ¥{(item.product.salePrice || item.product.price).toLocaleString()}
                   </div>
                   <div className="cart-item__total-price">
-                    ¥{item.totalPrice.toLocaleString()}
+                    ¥{((item.product.salePrice || item.product.price) * item.quantity).toLocaleString()}
                   </div>
                 </div>
 
@@ -139,7 +156,7 @@ export const Cart: React.FC = () => {
 
             <div className="cart__summary-content">
               <div className="cart__summary-row">
-                <span>小計 ({items.length}点)</span>
+                <span>小計 ({validItems.length}点)</span>
                 <span>¥{totalPrice.toLocaleString()}</span>
               </div>
 

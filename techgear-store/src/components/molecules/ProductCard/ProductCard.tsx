@@ -30,7 +30,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onProductClic
     <div className="product-card" onClick={handleCardClick}>
         <div className="product-card__image-wrapper">
           <img
-            src={product.mainImage}
+            src={product.imageUrl || product.images?.[0] || '/placeholder-product.svg'}
             alt={product.name}
             className="product-card__image"
           />

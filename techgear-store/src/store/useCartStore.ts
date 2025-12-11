@@ -78,6 +78,26 @@ export const useCartStore = create<CartStore>()(
     }),
     {
       name: 'cart-storage',
+      // データ移行ロジック：古いデータ形式を新しい形式に変換
+      migrate: (persistedState: any) => {
+        if (!persistedState || !persistedState.items) {
+          return { items: [] };
+        }
+
+        // 各アイテムをバリデーション
+        const validItems = persistedState.items.filter((item: any) => {
+          if (!item || !item.product) return false;
+          if (!item.product.id || typeof item.product.id !== 'string') return false;
+          if (typeof item.product.price !== 'number' || isNaN(item.product.price)) return false;
+          if (typeof item.quantity !== 'number' || isNaN(item.quantity)) return false;
+          return true;
+        });
+
+        return {
+          ...persistedState,
+          items: validItems,
+        };
+      },
     }
   )
 );

@@ -1,0 +1,153 @@
+.stripe-checkout-form {
+  width: 100%;
+}
+
+.stripe-checkout-form__test-mode {
+  background-color: #fff3cd;
+  border: 1px solid #ffc107;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 24px;
+}
+
+.stripe-checkout-form__test-mode-badge {
+  display: inline-block;
+  background-color: #ffc107;
+  color: #000;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.stripe-checkout-form__test-mode-text {
+  color: #856404;
+  font-size: 14px;
+  margin: 8px 0;
+}
+
+.stripe-checkout-form__test-cards {
+  margin-top: 12px;
+}
+
+.stripe-checkout-form__test-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  padding: 8px 12px;
+  background-color: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.stripe-checkout-form__test-card:hover {
+  background-color: #f5f5f5;
+  border-color: #1976d2;
+}
+
+.stripe-checkout-form__test-card span {
+  font-size: 13px;
+  color: #666;
+}
+
+.stripe-checkout-form__test-card code {
+  font-family: 'Courier New', monospace;
+  font-size: 14px;
+  font-weight: 600;
+  color: #1976d2;
+  background-color: #f0f4f8;
+  padding: 2px 6px;
+  border-radius: 3px;
+}
+
+.stripe-checkout-form__field {
+  margin-bottom: 20px;
+}
+
+.stripe-checkout-form__field label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #333;
+}
+
+.stripe-checkout-form__field input {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  font-size: 16px;
+  transition: border-color 0.2s;
+}
+
+.stripe-checkout-form__field input:focus {
+  outline: none;
+  border-color: #1976d2;
+  box-shadow: 0 0 0 3px rgba(25, 118, 210, 0.1);
+}
+
+.stripe-checkout-form__field input.error {
+  border-color: #f44336;
+}
+
+.stripe-checkout-form__field input:disabled {
+  background-color: #f5f5f5;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.stripe-checkout-form__row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.stripe-checkout-form__error {
+  display: block;
+  color: #f44336;
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+.stripe-checkout-form__submit-error {
+  background-color: #ffebee;
+  color: #c62828;
+  padding: 12px;
+  border-radius: 6px;
+  margin-bottom: 16px;
+  font-size: 14px;
+}
+
+.stripe-checkout-form__security {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 16px;
+  color: #666;
+  font-size: 13px;
+}
+
+.stripe-checkout-form__security svg {
+  color: #4caf50;
+}
+
+/* レスポンシブ対応 */
+@media (max-width: 480px) {
+  .stripe-checkout-form__row {
+    grid-template-columns: 1fr;
+  }
+
+  .stripe-checkout-form__test-card {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+}
