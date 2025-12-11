@@ -1,0 +1,239 @@
+.admin-products {
+  min-height: 100vh;
+  background-color: #f8f9fa;
+  padding: 20px;
+}
+
+.admin-products__loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  font-size: 1.2rem;
+  color: #666;
+}
+
+.admin-products__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+  padding: 20px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.admin-products__header h1 {
+  margin: 0;
+  font-size: 2rem;
+  color: #333;
+}
+
+.admin-products__actions {
+  display: flex;
+  gap: 12px;
+}
+
+.admin-products__list {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+}
+
+.admin-products__table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.admin-products__table th {
+  text-align: left;
+  padding: 16px;
+  background: #f8f9fa;
+  font-weight: 600;
+  color: #666;
+  font-size: 0.9rem;
+  border-bottom: 2px solid #e0e0e0;
+}
+
+.admin-products__table td {
+  padding: 16px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.admin-products__thumbnail {
+  width: 60px;
+  height: 60px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+}
+
+.admin-products__status {
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.admin-products__status--published {
+  background: #d4edda;
+  color: #155724;
+}
+
+.admin-products__status--draft {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.admin-products__actions-cell {
+  display: flex;
+  gap: 8px;
+}
+
+.admin-products__action {
+  padding: 6px 12px;
+  border: none;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.admin-products__action--edit {
+  background: #e3f2fd;
+  color: #1976d2;
+}
+
+.admin-products__action--edit:hover {
+  background: #bbdefb;
+}
+
+.admin-products__action--delete {
+  background: #ffebee;
+  color: #c62828;
+}
+
+.admin-products__action--delete:hover {
+  background: #ffcdd2;
+}
+
+.admin-products__empty {
+  padding: 60px;
+  text-align: center;
+  color: #999;
+  font-size: 1.1rem;
+}
+
+/* Modal Styles */
+.admin-products__modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.admin-products__modal-content {
+  background: white;
+  border-radius: 12px;
+  padding: 30px;
+  max-width: 600px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.admin-products__modal-content h2 {
+  margin: 0 0 24px 0;
+  font-size: 1.5rem;
+  color: #333;
+}
+
+.admin-products__form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.admin-products__form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.admin-products__form-group label {
+  font-weight: 500;
+  color: #333;
+  font-size: 0.95rem;
+}
+
+.admin-products__form-group input,
+.admin-products__form-group textarea,
+.admin-products__form-group select {
+  padding: 10px 12px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 1rem;
+  transition: border-color 0.3s ease;
+}
+
+.admin-products__form-group input:focus,
+.admin-products__form-group textarea:focus,
+.admin-products__form-group select:focus {
+  outline: none;
+  border-color: #5e3dec;
+}
+
+.admin-products__form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.admin-products__modal-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-top: 24px;
+}
+
+@media (max-width: 768px) {
+  .admin-products {
+    padding: 12px;
+  }
+
+  .admin-products__header {
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .admin-products__table {
+    font-size: 0.85rem;
+  }
+
+  .admin-products__table th,
+  .admin-products__table td {
+    padding: 12px 8px;
+  }
+
+  .admin-products__thumbnail {
+    width: 40px;
+    height: 40px;
+  }
+
+  .admin-products__form-row {
+    grid-template-columns: 1fr;
+  }
+}
