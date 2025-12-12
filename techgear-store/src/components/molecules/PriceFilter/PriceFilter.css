@@ -1,0 +1,209 @@
+.price-filter {
+  position: relative;
+  width: 100%;
+}
+
+.price-filter__toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 12px 16px;
+  background: #0066cc;
+  border: none;
+  font-size: 14px;
+  font-weight: 500;
+  color: white;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.price-filter__toggle:hover {
+  background: #0052a3;
+}
+
+.price-filter__toggle--expanded {
+  background: #0052a3;
+}
+
+.price-filter__badge {
+  font-size: 11px;
+  padding: 2px 8px;
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  margin-left: 8px;
+}
+
+.price-filter__arrow {
+  transition: transform 0.2s ease;
+  margin-left: auto;
+}
+
+.price-filter__toggle--expanded .price-filter__arrow {
+  transform: rotate(180deg);
+}
+
+.price-filter__content {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: white;
+  border: 2px solid #0066cc;
+  border-top: none;
+  padding: 20px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  z-index: 10;
+}
+
+.price-filter__slider-container {
+  position: relative;
+  height: 40px;
+  margin: 20px 10px 30px 10px;
+  padding: 0 10px;
+}
+
+/* React Sliderのスタイル */
+.price-filter__react-slider {
+  position: relative;
+  width: 100%;
+  height: 40px;
+  display: flex;
+  align-items: center;
+}
+
+.price-filter__track {
+  height: 4px;
+  background: #e0e0e0;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.price-filter__track-1 {
+  background: #0066cc;
+}
+
+.price-filter__thumb {
+  width: 20px;
+  height: 20px;
+  background: white;
+  border: 2px solid #0066cc;
+  border-radius: 50%;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  outline: none;
+}
+
+.price-filter__thumb:hover {
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
+}
+
+.price-filter__thumb:focus {
+  box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.2);
+}
+
+.price-filter__inputs {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.price-filter__input-group {
+  flex: 1;
+}
+
+.price-filter__input-group label {
+  display: block;
+  font-size: 12px;
+  color: #666;
+  margin-bottom: 4px;
+}
+
+.price-filter__input-wrapper {
+  display: flex;
+  align-items: center;
+  border: 1px solid #ddd;
+  padding: 8px 12px;
+  background: white;
+}
+
+.price-filter__input-wrapper:focus-within {
+  border-color: #0066cc;
+}
+
+.price-filter__input-wrapper span {
+  color: #666;
+  margin-right: 4px;
+}
+
+.price-filter__input-wrapper input {
+  flex: 1;
+  border: none;
+  outline: none;
+  font-size: 14px;
+  color: #333;
+  background: transparent;
+  -moz-appearance: textfield;
+}
+
+.price-filter__input-wrapper input::-webkit-outer-spin-button,
+.price-filter__input-wrapper input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.price-filter__separator {
+  color: #999;
+  margin-top: 20px;
+}
+
+.price-filter__actions {
+  display: flex;
+  gap: 12px;
+}
+
+.price-filter__reset {
+  flex: 1;
+  padding: 10px;
+  background: white;
+  border: 1px solid #ddd;
+  font-size: 14px;
+  font-weight: 500;
+  color: #666;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.price-filter__reset:hover:not(:disabled) {
+  border-color: #0066cc;
+  color: #0066cc;
+}
+
+.price-filter__reset:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.price-filter__apply {
+  flex: 1;
+  padding: 10px;
+  background: #0066cc;
+  border: none;
+  font-size: 14px;
+  font-weight: 500;
+  color: white;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.price-filter__apply:hover {
+  background: #0052a3;
+}

@@ -1,0 +1,121 @@
+.search-bar {
+  width: 100%;
+  max-width: 600px;
+}
+
+.search-bar__container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  background: white;
+  border: 2px solid #0066cc;
+  border-radius: 0;
+  padding: 0 16px;
+  height: 48px;
+  transition: all 0.2s ease;
+}
+
+.search-bar__container:hover {
+  border-color: #0052a3;
+  box-shadow: 0 2px 8px rgba(0, 102, 204, 0.15);
+}
+
+.search-bar__container:focus-within {
+  border-color: #0052a3;
+  box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.1);
+}
+
+.search-bar__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #0066cc;
+  margin-right: 12px;
+}
+
+.search-bar__input {
+  flex: 1;
+  border: none;
+  outline: none;
+  font-size: 15px;
+  font-weight: 400;
+  color: #333;
+  background: transparent;
+}
+
+.search-bar__input::placeholder {
+  color: #999;
+}
+
+.search-bar__clear {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: #0066cc;
+  color: white;
+  cursor: pointer;
+  padding: 0;
+  margin-left: 8px;
+  transition: all 0.2s ease;
+}
+
+.search-bar__clear:hover {
+  background: #0052a3;
+}
+
+.search-bar__spinner {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: 12px;
+}
+
+.search-bar__spinner-dot {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: #0066cc;
+  animation: search-pulse 1.4s ease-in-out infinite;
+}
+
+.search-bar__spinner-dot:nth-child(1) {
+  animation-delay: -0.32s;
+}
+
+.search-bar__spinner-dot:nth-child(2) {
+  animation-delay: -0.16s;
+}
+
+.search-bar__spinner-dot:nth-child(3) {
+  animation-delay: 0s;
+}
+
+@keyframes search-pulse {
+  0%, 80%, 100% {
+    opacity: 0.3;
+    transform: scale(0.8);
+  }
+  40% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* レスポンシブ対応 */
+@media (max-width: 768px) {
+  .search-bar__container {
+    height: 44px;
+    padding: 0 12px;
+  }
+
+  .search-bar__input {
+    font-size: 14px;
+  }
+
+  .search-bar__icon {
+    margin-right: 8px;
+  }
+}
