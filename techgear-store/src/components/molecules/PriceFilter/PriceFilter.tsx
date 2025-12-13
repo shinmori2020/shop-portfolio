@@ -18,7 +18,7 @@ export const PriceFilter: React.FC<PriceFilterProps> = ({
   onPriceChange
 }) => {
   const [values, setValues] = useState([currentMin || min, currentMax || max]);
-  const [isExpanded, setIsExpanded] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(true);
 
   useEffect(() => {
     setValues([currentMin || min, currentMax || max]);
@@ -55,35 +55,42 @@ export const PriceFilter: React.FC<PriceFilterProps> = ({
 
   return (
     <div className="price-filter">
-      <button
-        className={`price-filter__toggle ${isExpanded ? 'price-filter__toggle--expanded' : ''}`}
-        onClick={() => setIsExpanded(!isExpanded)}
-      >
-        <span>価格帯</span>
-        {isFiltered && (
-          <span className="price-filter__badge">
-            ¥{values[0].toLocaleString()} - ¥{values[1].toLocaleString()}
-          </span>
-        )}
-        <svg
-          className="price-filter__arrow"
-          width="12"
-          height="8"
-          viewBox="0 0 12 8"
-          fill="none"
-        >
-          <path
-            d="M1 1L6 6L11 1"
-            stroke="white"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
-      </button>
+      <div className={`price-filter__header ${isExpanded ? 'price-filter__header--expanded' : ''}`}>
+        <h3 className="price-filter__title">価格帯</h3>
+        <div className="price-filter__actions">
+          {isFiltered && (
+            <button
+              className="price-filter__clear"
+              onClick={handleReset}
+            >
+              クリア
+            </button>
+          )}
+          <button
+            className="price-filter__toggle"
+            onClick={() => setIsExpanded(!isExpanded)}
+            aria-label={isExpanded ? '折りたたむ' : '展開する'}
+          >
+            <svg
+              className={`price-filter__arrow ${isExpanded ? 'price-filter__arrow--expanded' : ''}`}
+              width="12"
+              height="8"
+              viewBox="0 0 12 8"
+              fill="none"
+            >
+              <path
+                d="M1 1L6 6L11 1"
+                stroke="#666"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </button>
+        </div>
+      </div>
 
-      {isExpanded && (
-        <div className="price-filter__content">
+      <div className={`price-filter__content ${isExpanded ? 'price-filter__content--expanded' : ''}`}>
           <div className="price-filter__slider-container">
             <ReactSlider
               className="price-filter__react-slider"
@@ -136,21 +143,20 @@ export const PriceFilter: React.FC<PriceFilterProps> = ({
 
           <div className="price-filter__actions">
             <button
+              className="price-filter__apply"
+              onClick={handleApply}
+            >
+              適用
+            </button>
+            <button
               className="price-filter__reset"
               onClick={handleReset}
               disabled={!isFiltered}
             >
               リセット
             </button>
-            <button
-              className="price-filter__apply"
-              onClick={handleApply}
-            >
-              適用
-            </button>
-          </div>
         </div>
-      )}
+      </div>
     </div>
   );
 };

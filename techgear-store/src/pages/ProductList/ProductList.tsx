@@ -5,6 +5,11 @@ import { db } from '../../lib/firebase';
 import { ProductCard } from '../../components/molecules/ProductCard';
 import { SearchBar } from '../../components/molecules/SearchBar';
 import { PriceFilter } from '../../components/molecules/PriceFilter';
+import { DiscountFilter } from '../../components/molecules/DiscountFilter';
+import { BrandFilter } from '../../components/molecules/BrandFilter';
+import { StockFilter } from '../../components/molecules/StockFilter';
+import { RatingFilter } from '../../components/molecules/RatingFilter';
+import { TrendingFilter } from '../../components/molecules/TrendingFilter';
 import { Product } from '../../types';
 import './ProductList.css';
 
@@ -17,7 +22,24 @@ export const ProductList: React.FC = () => {
   // フィルター状態
   const [searchQuery, setSearchQuery] = useState(searchParams.get('q') || '');
   const [selectedCategory, setSelectedCategory] = useState<string>(searchParams.get('category') || 'all');
-  const [selectedBrand, setSelectedBrand] = useState<string>(searchParams.get('brand') || 'all');
+  const [selectedBrands, setSelectedBrands] = useState<string[]>(
+    searchParams.get('brands')?.split(',').filter(Boolean) || []
+  );
+  const [selectedDiscounts, setSelectedDiscounts] = useState<string[]>(
+    searchParams.get('discounts')?.split(',').filter(Boolean) || []
+  );
+  const [selectedStockFilter, setSelectedStockFilter] = useState<string[]>(
+    searchParams.get('stock')?.split(',').filter(Boolean) || []
+  );
+  const [selectedRating, setSelectedRating] = useState<number | null>(
+    searchParams.get('rating') ? Number(searchParams.get('rating')) : null
+  );
+  const [minReviewCount, setMinReviewCount] = useState<number>(
+    searchParams.get('minReviews') ? Number(searchParams.get('minReviews')) : 0
+  );
+  const [selectedTrending, setSelectedTrending] = useState<string>(
+    searchParams.get('trending') || 'none'
+  );
   const [priceRange, setPriceRange] = useState({
     min: Number(searchParams.get('minPrice')) || 0,
     max: Number(searchParams.get('maxPrice')) || 50000
@@ -76,13 +98,18 @@ export const ProductList: React.FC = () => {
     const params = new URLSearchParams();
     if (searchQuery) params.set('q', searchQuery);
     if (selectedCategory !== 'all') params.set('category', selectedCategory);
-    if (selectedBrand !== 'all') params.set('brand', selectedBrand);
+    if (selectedBrands.length > 0) params.set('brands', selectedBrands.join(','));
+    if (selectedDiscounts.length > 0) params.set('discounts', selectedDiscounts.join(','));
+    if (selectedStockFilter.length > 0) params.set('stock', selectedStockFilter.join(','));
+    if (selectedRating !== null) params.set('rating', selectedRating.toString());
+    if (minReviewCount > 0) params.set('minReviews', minReviewCount.toString());
+    if (selectedTrending !== 'none') params.set('trending', selectedTrending);
     if (priceRange.min > 0) params.set('minPrice', priceRange.min.toString());
-    if (priceRange.max < 999999) params.set('maxPrice', priceRange.max.toString());
+    if (priceRange.max < 50000) params.set('maxPrice', priceRange.max.toString());
     if (sortBy !== 'default') params.set('sort', sortBy);
 
     setSearchParams(params);
-  }, [searchQuery, selectedCategory, selectedBrand, priceRange, sortBy, setSearchParams]);
+  }, [searchQuery, selectedCategory, selectedBrands, selectedDiscounts, selectedStockFilter, selectedRating, minReviewCount, selectedTrending, priceRange, sortBy, setSearchParams]);
 
   // カテゴリー一覧を取得
   const categories = useMemo(() => {
@@ -93,7 +120,7 @@ export const ProductList: React.FC = () => {
   // ブランド一覧を取得
   const brands = useMemo(() => {
     const uniqueBrands = Array.from(new Set(products.map(p => p.brand).filter(Boolean)));
-    return ['all', ...uniqueBrands];
+    return uniqueBrands;
   }, [products]);
 
   // 価格範囲を取得
@@ -127,8 +154,109 @@ export const ProductList: React.FC = () => {
     }
 
     // ブランドフィルター
-    if (selectedBrand !== 'all') {
-      filteredProducts = filteredProducts.filter(p => p.brand === selectedBrand);
+    if (selectedBrands.length > 0) {
+      filteredProducts = filteredProducts.filter(p =>
+        p.brand && selectedBrands.includes(p.brand)
+      );
+    }
+
+    // 割引フィルター
+    if (selectedDiscounts.length > 0) {
+      filteredProducts = filteredProducts.filter(p => {
+        if (selectedDiscounts.includes('all-discounts')) {
+          return p.onSale || (p.salePrice && p.salePrice < p.price);
+        }
+        if (selectedDiscounts.includes('timesale')) {
+          // タイムセール商品（今回は onSale フラグで判定）
+          return p.onSale;
+        }
+
+        // 割引率計算
+        if (p.salePrice && p.salePrice < p.price) {
+          const discountRate = ((p.price - p.salePrice) / p.price) * 100;
+
+          if (selectedDiscounts.includes('discount-10') && discountRate >= 10) return true;
+          if (selectedDiscounts.includes('discount-20') && discountRate >= 20) return true;
+          if (selectedDiscounts.includes('discount-30') && discountRate >= 30) return true;
+        }
+
+        return false;
+      });
+    }
+
+    // 在庫フィルター
+    if (selectedStockFilter.length > 0) {
+      filteredProducts = filteredProducts.filter(p => {
+        const stockOption = selectedStockFilter[0]; // ラジオボタンなので単一選択
+
+        switch (stockOption) {
+          case 'in-stock':
+            return p.stock > 0;
+          case 'ready-to-ship':
+            return p.stock >= 5;
+          case 'low-stock':
+            return p.stock > 0 && p.stock <= 3;
+          case 'include-out-of-stock':
+            return true; // すべて表示
+          default:
+            return p.stock > 0; // デフォルトは在庫ありのみ
+        }
+      });
+    } else {
+      // デフォルトは在庫ありのみ表示
+      filteredProducts = filteredProducts.filter(p => p.stock > 0);
+    }
+
+    // 評価フィルター
+    if (selectedRating !== null) {
+      filteredProducts = filteredProducts.filter(p => p.rating >= selectedRating);
+    }
+
+    // レビュー数フィルター
+    if (minReviewCount > 0) {
+      filteredProducts = filteredProducts.filter(p => p.reviewCount >= minReviewCount);
+    }
+
+    // 新着・人気フィルター
+    if (selectedTrending !== 'none') {
+      const now = new Date();
+      const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+      const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+
+      switch (selectedTrending) {
+        case 'new-7days':
+          filteredProducts = filteredProducts.filter(p => {
+            if (!p.createdAt) return false;
+            const productDate = new Date(p.createdAt.seconds * 1000);
+            return productDate >= sevenDaysAgo;
+          });
+          break;
+        case 'new-30days':
+          filteredProducts = filteredProducts.filter(p => {
+            if (!p.createdAt) return false;
+            const productDate = new Date(p.createdAt.seconds * 1000);
+            return productDate >= thirtyDaysAgo;
+          });
+          break;
+        case 'bestseller':
+          // 売上数またはレビュー数でトップ10を取得
+          filteredProducts = [...filteredProducts]
+            .sort((a, b) => (b.reviewCount || 0) - (a.reviewCount || 0))
+            .slice(0, 10);
+          break;
+        case 'trending':
+          // 急上昇中（最近のレビューが多い商品）
+          filteredProducts = filteredProducts.filter(p => p.reviewCount >= 10 && p.rating >= 4);
+          break;
+        case 'restocked':
+          // 再入荷商品（在庫が少なかったが今は在庫がある）
+          filteredProducts = filteredProducts.filter(p => p.stock > 5 && p.stock <= 20);
+          break;
+        case 'limited':
+          // 限定商品（在庫が少ない）
+          filteredProducts = filteredProducts.filter(p => p.stock > 0 && p.stock <= 5);
+          break;
+      }
     }
 
     // 価格フィルター
@@ -174,7 +302,7 @@ export const ProductList: React.FC = () => {
     }
 
     return filteredProducts;
-  }, [products, searchQuery, selectedCategory, selectedBrand, priceRange, sortBy]);
+  }, [products, searchQuery, selectedCategory, selectedBrands, selectedDiscounts, selectedStockFilter, selectedRating, minReviewCount, selectedTrending, priceRange, sortBy]);
 
   const handleProductClick = (productId: string) => {
     navigate(`/products/${productId}`);
@@ -184,8 +312,13 @@ export const ProductList: React.FC = () => {
   const handleResetFilters = () => {
     setSearchQuery('');
     setSelectedCategory('all');
-    setSelectedBrand('all');
-    setPriceRange({ min: 0, max: 999999 });
+    setSelectedBrands([]);
+    setSelectedDiscounts([]);
+    setSelectedStockFilter([]);
+    setSelectedRating(null);
+    setMinReviewCount(0);
+    setSelectedTrending('none');
+    setPriceRange({ min: 0, max: 50000 });
     setSortBy('default');
   };
 
@@ -193,8 +326,13 @@ export const ProductList: React.FC = () => {
   const activeFilterCount = [
     searchQuery !== '',
     selectedCategory !== 'all',
-    selectedBrand !== 'all',
-    priceRange.min > 0 || priceRange.max < 999999
+    selectedBrands.length > 0,
+    selectedDiscounts.length > 0,
+    selectedStockFilter.length > 0,
+    selectedRating !== null,
+    minReviewCount > 0,
+    selectedTrending !== 'none',
+    priceRange.min > 0 || priceRange.max < 50000
   ].filter(Boolean).length;
 
   return (
@@ -216,26 +354,13 @@ export const ProductList: React.FC = () => {
         {/* サイドバーフィルター */}
         <aside className="product-list__sidebar">
           <div className="product-list__sidebar-header">
-            <h2>フィルター</h2>
-            {activeFilterCount > 0 && (
-              <button
-                className="product-list__reset-button"
-                onClick={handleResetFilters}
-              >
-                リセット ({activeFilterCount})
-              </button>
-            )}
-          </div>
-
-          {/* 価格フィルター */}
-          <div className="product-list__filter-section">
-            <PriceFilter
-              min={priceRangeData.min}
-              max={priceRangeData.max}
-              currentMin={priceRange.min}
-              currentMax={priceRange.max}
-              onPriceChange={(min, max) => setPriceRange({ min, max })}
-            />
+            <button
+              className="product-list__reset-button"
+              onClick={handleResetFilters}
+              disabled={activeFilterCount === 0}
+            >
+              すべてリセット {activeFilterCount > 0 && `(${activeFilterCount})`}
+            </button>
           </div>
 
           {/* カテゴリーフィルター */}
@@ -257,26 +382,50 @@ export const ProductList: React.FC = () => {
             </div>
           </div>
 
+          {/* 価格フィルター */}
+          <PriceFilter
+            min={priceRangeData.min}
+            max={priceRangeData.max}
+            currentMin={priceRange.min}
+            currentMax={priceRange.max}
+            onPriceChange={(min, max) => setPriceRange({ min, max })}
+          />
+
+          {/* 割引フィルター */}
+          <DiscountFilter
+            selectedOptions={selectedDiscounts}
+            onFilterChange={setSelectedDiscounts}
+          />
+
+          {/* 新着・人気フィルター */}
+          <TrendingFilter
+            selectedOption={selectedTrending}
+            onFilterChange={setSelectedTrending}
+          />
+
           {/* ブランドフィルター */}
-          {brands.length > 1 && (
-            <div className="product-list__filter-section">
-              <h3 className="product-list__filter-title">ブランド</h3>
-              <div className="product-list__filter-options">
-                {brands.map(brand => (
-                  <label key={brand} className="product-list__filter-option">
-                    <input
-                      type="radio"
-                      name="brand"
-                      value={brand}
-                      checked={selectedBrand === brand}
-                      onChange={(e) => setSelectedBrand(e.target.value)}
-                    />
-                    <span>{brand === 'all' ? 'すべて' : brand}</span>
-                  </label>
-                ))}
-              </div>
-            </div>
+          {brands.length > 0 && (
+            <BrandFilter
+              brands={brands}
+              selectedBrands={selectedBrands}
+              onBrandChange={setSelectedBrands}
+            />
           )}
+
+          {/* レビューフィルター */}
+          <RatingFilter
+            selectedRating={selectedRating}
+            minReviews={minReviewCount}
+            onRatingChange={setSelectedRating}
+            onMinReviewsChange={setMinReviewCount}
+          />
+
+          {/* 在庫フィルター */}
+          <StockFilter
+            selectedOptions={selectedStockFilter}
+            onFilterChange={setSelectedStockFilter}
+          />
+
         </aside>
 
         {/* メインコンテンツ */}

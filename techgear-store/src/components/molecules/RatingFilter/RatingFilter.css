@@ -1,0 +1,134 @@
+.rating-filter {
+  background: #f0f7ff;
+  border: 1px solid #cce0ff;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.rating-filter__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* 展開時のみheaderに下マージンを追加 */
+.rating-filter__header--expanded {
+  margin-bottom: 12px;
+}
+
+.rating-filter__title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+  margin: 0;
+}
+
+.rating-filter__actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.rating-filter__clear {
+  background: none;
+  border: none;
+  color: #0066cc;
+  font-size: 12px;
+  cursor: pointer;
+  padding: 0;
+  text-decoration: underline;
+}
+
+.rating-filter__clear:hover {
+  color: #0052a3;
+}
+
+.rating-filter__toggle {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.rating-filter__arrow {
+  transition: transform 0.2s ease;
+}
+
+.rating-filter__arrow--expanded {
+  transform: rotate(180deg);
+}
+
+.rating-filter__content {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.rating-filter__section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.rating-filter__section-title {
+  font-size: 13px;
+  font-weight: 500;
+  color: #555;
+  margin: 0;
+  padding-bottom: 4px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.rating-filter__rating-options,
+.rating-filter__review-options {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.rating-filter__option {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  padding: 4px 0;
+}
+
+.rating-filter__option:hover {
+  background: rgba(0, 102, 204, 0.05);
+  margin: 0 -4px;
+  padding: 4px 4px;
+}
+
+.rating-filter__radio {
+  width: 16px;
+  height: 16px;
+  margin-right: 8px;
+  cursor: pointer;
+  accent-color: #0066cc;
+}
+
+.rating-filter__stars {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.rating-filter__star {
+  color: #ddd;
+  font-size: 16px;
+  line-height: 1;
+}
+
+.rating-filter__star--filled {
+  color: #ffa500;
+}
+
+.rating-filter__label {
+  font-size: 14px;
+  color: #555;
+  user-select: none;
+  margin-left: 4px;
+}

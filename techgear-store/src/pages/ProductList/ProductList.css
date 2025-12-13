@@ -14,10 +14,7 @@
 .product-list__title {
   font-size: clamp(28px, 4vw, 36px);
   font-weight: 800;
-  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-accent) 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: #000;
   margin: 0 0 var(--spacing-sm) 0;
   position: relative;
   padding-bottom: var(--spacing-md);
@@ -31,7 +28,7 @@
   transform: translateX(-50%);
   width: 80px;
   height: 4px;
-  background: linear-gradient(90deg, var(--color-primary), var(--color-accent));
+  background: #000;
   border-radius: var(--radius-full);
 }
 
@@ -56,44 +53,41 @@
 }
 
 .product-list__sidebar-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
-  padding: 12px 16px;
-  background: #0066cc;
-  color: white;
-}
-
-.product-list__sidebar-header h2 {
-  font-size: 18px;
-  font-weight: 600;
-  color: white;
-  margin: 0;
+  background: #f0f7ff;
+  border: 1px solid #cce0ff;
+  padding: 16px;
+  margin-bottom: 16px;
 }
 
 .product-list__reset-button {
-  padding: 6px 12px;
-  background: rgba(255, 255, 255, 0.2);
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  width: 100%;
+  padding: 10px;
+  background: #0066cc;
+  border: none;
   color: white;
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
-.product-list__reset-button:hover {
-  background: rgba(255, 255, 255, 0.3);
-  border-color: white;
+.product-list__reset-button:hover:not(:disabled) {
+  background: #0052a3;
+}
+
+.product-list__reset-button:disabled {
+  background: #b3d1ff;
+  color: #ffffff;
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 /* フィルターセクション */
 .product-list__filter-section {
   margin-bottom: 20px;
   padding: 16px;
-  background: #f5f5f5;
-  border: 1px solid #ddd;
+  background: #f0f7ff;
+  border: 1px solid #cce0ff;
 }
 
 .product-list__filter-title {

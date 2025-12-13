@@ -1,0 +1,1 @@
+export { TrendingFilter } from './TrendingFilter';

@@ -1,0 +1,93 @@
+.brand-filter {
+  background: #f0f7ff;
+  border: 1px solid #cce0ff;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.brand-filter__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.brand-filter__title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+  margin: 0;
+}
+
+.brand-filter__actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.brand-filter__clear {
+  background: none;
+  border: none;
+  color: #0066cc;
+  font-size: 12px;
+  cursor: pointer;
+  padding: 0;
+  text-decoration: underline;
+}
+
+.brand-filter__clear:hover {
+  color: #0052a3;
+}
+
+.brand-filter__toggle {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.brand-filter__arrow {
+  transition: transform 0.2s ease;
+}
+
+.brand-filter__arrow--expanded {
+  transform: rotate(180deg);
+}
+
+.brand-filter__options {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.brand-filter__option {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  padding: 4px 0;
+}
+
+.brand-filter__option:hover {
+  background: rgba(0, 102, 204, 0.05);
+  margin: 0 -4px;
+  padding: 4px 4px;
+}
+
+.brand-filter__checkbox {
+  width: 16px;
+  height: 16px;
+  margin-right: 8px;
+  cursor: pointer;
+  accent-color: #0066cc;
+}
+
+.brand-filter__label {
+  font-size: 14px;
+  color: #555;
+  user-select: none;
+}

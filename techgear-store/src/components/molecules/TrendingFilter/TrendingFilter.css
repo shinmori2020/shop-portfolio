@@ -1,0 +1,103 @@
+.trending-filter {
+  background: #f0f7ff;
+  border: 1px solid #cce0ff;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.trending-filter__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* 展開時のみheaderに下マージンを追加 */
+.trending-filter__header--expanded {
+  margin-bottom: 12px;
+}
+
+.trending-filter__title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+  margin: 0;
+}
+
+.trending-filter__actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.trending-filter__clear {
+  background: none;
+  border: none;
+  color: #0066cc;
+  font-size: 12px;
+  cursor: pointer;
+  padding: 0;
+  text-decoration: underline;
+}
+
+.trending-filter__clear:hover {
+  color: #0052a3;
+}
+
+.trending-filter__toggle {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.trending-filter__arrow {
+  transition: transform 0.3s ease;
+}
+
+.trending-filter__arrow--expanded {
+  transform: rotate(180deg);
+}
+
+.trending-filter__content {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease-out;
+}
+
+.trending-filter__content--expanded {
+  max-height: 400px;
+  transition: max-height 0.3s ease-in;
+}
+
+.trending-filter__options {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.trending-filter__option {
+  display: flex;
+  align-items: center;
+  font-size: 13px;
+  color: #333;
+  cursor: pointer;
+  padding: 4px 0;
+  transition: color 0.2s ease;
+}
+
+.trending-filter__option:hover {
+  color: #0066cc;
+}
+
+.trending-filter__radio {
+  margin-right: 8px;
+  cursor: pointer;
+  accent-color: #0066cc;
+}
+
+.trending-filter__label {
+  flex: 1;
+}
