@@ -11,15 +11,25 @@ export const Header: React.FC = () => {
   const { currentUser, logout } = useAuth();
   const cartItemsCount = getTotalItems();
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const [showMobileMenu, setShowMobileMenu] = useState(false);
 
   const handleLogout = async () => {
     try {
       await logout();
       navigate('/');
       setShowUserMenu(false);
+      setShowMobileMenu(false);
     } catch (error) {
       console.error('Logout error:', error);
     }
+  };
+
+  const closeMobileMenu = () => {
+    setShowMobileMenu(false);
+  };
+
+  const toggleMobileMenu = () => {
+    setShowMobileMenu(!showMobileMenu);
   };
 
   return (
@@ -44,6 +54,17 @@ export const Header: React.FC = () => {
             </nav>
 
             <div className="header__actions">
+              {/* ハンバーガーメニューボタン */}
+              <button
+                className="header__menu-button"
+                onClick={toggleMobileMenu}
+                aria-label="メニュー"
+              >
+                <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+              </button>
+
               <Link to="/cart" className="header__cart">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -112,6 +133,72 @@ export const Header: React.FC = () => {
               )}
             </div>
           </div>
+        </div>
+      </div>
+
+      {/* モバイルメニュー */}
+      <div className={`header__mobile-menu ${showMobileMenu ? 'header__mobile-menu--open' : ''}`}>
+        <ul className="header__mobile-nav">
+          <li className="header__mobile-nav-item">
+            <Link
+              to="/products"
+              className="header__mobile-nav-link"
+              onClick={closeMobileMenu}
+            >
+              商品一覧
+            </Link>
+          </li>
+          <li className="header__mobile-nav-item">
+            <Link
+              to="/categories"
+              className="header__mobile-nav-link"
+              onClick={closeMobileMenu}
+            >
+              カテゴリー
+            </Link>
+          </li>
+          <li className="header__mobile-nav-item">
+            <Link
+              to="/about"
+              className="header__mobile-nav-link"
+              onClick={closeMobileMenu}
+            >
+              About
+            </Link>
+          </li>
+        </ul>
+
+        <div className="header__mobile-actions">
+          {currentUser ? (
+            <>
+              <Link
+                to="/account"
+                className="header__mobile-nav-link"
+                onClick={closeMobileMenu}
+              >
+                マイページ
+              </Link>
+              <Link
+                to="/orders"
+                className="header__mobile-nav-link"
+                onClick={closeMobileMenu}
+              >
+                注文履歴
+              </Link>
+              <button
+                className="header__mobile-nav-link"
+                onClick={handleLogout}
+              >
+                ログアウト
+              </button>
+            </>
+          ) : (
+            <Link to="/login" onClick={closeMobileMenu}>
+              <Button size="medium" variant="primary">
+                ログイン
+              </Button>
+            </Link>
+          )}
         </div>
       </div>
     </header>

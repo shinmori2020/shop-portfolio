@@ -200,3 +200,137 @@
     padding: var(--spacing-sm) var(--spacing-lg);
   }
 }
+
+/* 小型モバイル対応（480px以下） */
+@media (max-width: 480px) {
+  .footer {
+    padding: var(--spacing-2xl) var(--spacing-sm) var(--spacing-lg);
+  }
+
+  .footer__content {
+    gap: var(--spacing-xl);
+  }
+
+  .footer__title {
+    font-size: 24px;
+  }
+
+  .footer__description {
+    font-size: 14px;
+  }
+
+  .footer__social {
+    gap: var(--spacing-sm);
+    justify-content: center;
+  }
+
+  .footer__social-link {
+    width: 44px;
+    height: 44px;
+  }
+
+  .footer__section-title {
+    font-size: 14px;
+  }
+
+  .footer__link {
+    font-size: 14px;
+  }
+
+  .footer__payment {
+    padding: var(--spacing-sm) var(--spacing-md);
+    flex-direction: column;
+    gap: var(--spacing-sm);
+  }
+
+  .footer__payment-text {
+    font-size: 12px;
+  }
+
+  .footer__payment-icon {
+    font-size: 24px;
+  }
+}
+
+/* 超小型モバイル対応（320px以下） */
+@media (max-width: 320px) {
+  .footer {
+    padding: var(--spacing-xl) 8px var(--spacing-md);
+    margin-top: var(--spacing-2xl);
+  }
+
+  .footer__content {
+    gap: var(--spacing-lg);
+  }
+
+  .footer__section {
+    gap: var(--spacing-md);
+  }
+
+  .footer__title {
+    font-size: 20px;
+    margin: 0 0 var(--spacing-sm) 0;
+  }
+
+  .footer__description {
+    font-size: 13px;
+    line-height: 1.6;
+  }
+
+  .footer__social {
+    gap: var(--spacing-xs);
+    margin-top: var(--spacing-md);
+  }
+
+  .footer__social-link {
+    width: 40px;
+    height: 40px;
+  }
+
+  .footer__social-link svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .footer__section-title {
+    font-size: 13px;
+    margin: 0 0 var(--spacing-md) 0;
+  }
+
+  .footer__links {
+    gap: var(--spacing-sm);
+  }
+
+  .footer__link {
+    font-size: 13px;
+  }
+
+  .footer__divider {
+    margin: var(--spacing-xl) 0 var(--spacing-md);
+  }
+
+  .footer__bottom {
+    gap: var(--spacing-md);
+  }
+
+  .footer__copyright {
+    font-size: 12px;
+  }
+
+  .footer__payment {
+    padding: var(--spacing-xs) var(--spacing-sm);
+    gap: var(--spacing-xs);
+  }
+
+  .footer__payment-text {
+    font-size: 11px;
+  }
+
+  .footer__payment-icons {
+    gap: var(--spacing-xs);
+  }
+
+  .footer__payment-icon {
+    font-size: 20px;
+  }
+}

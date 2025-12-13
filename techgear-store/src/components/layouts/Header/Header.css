@@ -32,7 +32,7 @@
 }
 
 .header__logo {
-  font-size: 28px;
+  font-size: 50px;
   font-weight: 700;
   color: var(--color-text-primary);
   text-decoration: none;
@@ -41,6 +41,13 @@
   letter-spacing: -0.02em;
   font-family: 'Rajdhani', sans-serif;
   position: relative;
+  white-space: nowrap;
+}
+
+.header__logo h1 {
+  font-size: 50px;
+  margin: 0;
+  white-space: nowrap;
 }
 
 .header__logo:hover {
@@ -329,6 +336,34 @@
 }
 
 /* レスポンシブ */
+/* タブレット対応（1024px以下） */
+@media (max-width: 1024px) {
+  .header__content {
+    gap: var(--spacing-xl);
+  }
+
+  .header__right {
+    gap: var(--spacing-xl);
+  }
+
+  .header__nav {
+    gap: var(--spacing-lg);
+  }
+
+  .header__nav-link {
+    font-size: 14px;
+  }
+
+  .header__logo {
+    font-size: 36px;
+  }
+
+  .header__logo h1 {
+    font-size: 36px;
+  }
+}
+
+/* モバイル対応（768px以下） */
 @media (max-width: 768px) {
   .header__container {
     padding: 0 var(--spacing-md);
@@ -336,7 +371,11 @@
   }
 
   .header__logo {
-    font-size: 24px;
+    font-size: 28px;
+  }
+
+  .header__logo h1 {
+    font-size: 28px;
   }
 
   .header__nav {
@@ -353,5 +392,117 @@
 
   .header__mobile-menu {
     top: 70px;
+  }
+
+  /* ユーザー名を非表示にしてアバターのみ表示 */
+  .header__user-name {
+    display: none;
+  }
+
+  .header__user-button {
+    padding: var(--spacing-xs);
+    min-width: 48px;
+  }
+}
+
+/* 小型モバイル対応（480px以下） */
+@media (max-width: 480px) {
+  .header__container {
+    padding: 0 var(--spacing-sm);
+    height: 60px;
+  }
+
+  .header__logo {
+    font-size: 20px;
+  }
+
+  .header__logo h1 {
+    font-size: 20px;
+  }
+
+  .header__actions {
+    gap: var(--spacing-sm);
+  }
+
+  .header__cart,
+  .header__menu-button,
+  .header__user-button {
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+  }
+
+  .header__user-avatar {
+    width: 28px;
+    height: 28px;
+    font-size: 12px;
+  }
+
+  .header__mobile-menu {
+    top: 60px;
+    padding: var(--spacing-lg);
+  }
+}
+
+/* 超小型モバイル対応（320px以下） */
+@media (max-width: 320px) {
+  .header__container {
+    padding: 0 8px;
+    height: 56px;
+  }
+
+  .header__logo {
+    font-size: 18px;
+  }
+
+  .header__logo h1 {
+    font-size: 18px;
+    margin: 0;
+  }
+
+  .header__actions {
+    gap: 8px;
+  }
+
+  .header__cart,
+  .header__menu-button,
+  .header__user-button {
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+    padding: 6px;
+  }
+
+  .header__cart svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  .header__menu-button svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  .header__user-avatar {
+    width: 24px;
+    height: 24px;
+    font-size: 11px;
+  }
+
+  .header__cart-badge {
+    font-size: 10px;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 4px;
+  }
+
+  .header__mobile-menu {
+    top: 56px;
+    padding: var(--spacing-md);
+  }
+
+  .header__mobile-nav-link {
+    font-size: 16px;
+    padding: var(--spacing-md) 0;
   }
 }

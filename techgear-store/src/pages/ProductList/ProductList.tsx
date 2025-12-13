@@ -18,6 +18,7 @@ export const ProductList: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState(false);
 
   // フィルター状態
   const [searchQuery, setSearchQuery] = useState(searchParams.get('q') || '');
@@ -322,6 +323,32 @@ export const ProductList: React.FC = () => {
     setSortBy('default');
   };
 
+  // モバイルフィルタードロワーの開閉
+  const openFilterDrawer = () => {
+    setIsFilterDrawerOpen(true);
+    document.body.style.overflow = 'hidden'; // 背景のスクロールを無効化
+  };
+
+  const closeFilterDrawer = () => {
+    setIsFilterDrawerOpen(false);
+    document.body.style.overflow = ''; // スクロールを元に戻す
+  };
+
+  // ESCキーでドロワーを閉じる
+  useEffect(() => {
+    const handleEscKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isFilterDrawerOpen) {
+        closeFilterDrawer();
+      }
+    };
+    if (isFilterDrawerOpen) {
+      document.addEventListener('keydown', handleEscKey);
+    }
+    return () => {
+      document.removeEventListener('keydown', handleEscKey);
+    };
+  }, [isFilterDrawerOpen]);
+
   // アクティブなフィルターの数を計算
   const activeFilterCount = [
     searchQuery !== '',
@@ -393,8 +420,8 @@ export const ProductList: React.FC = () => {
 
           {/* 割引フィルター */}
           <DiscountFilter
-            selectedOptions={selectedDiscounts}
-            onFilterChange={setSelectedDiscounts}
+            selectedDiscounts={selectedDiscounts}
+            onDiscountChange={setSelectedDiscounts}
           />
 
           {/* 新着・人気フィルター */}
@@ -485,6 +512,110 @@ export const ProductList: React.FC = () => {
           )}
         </div>
       </div>
+
+      {/* モバイルフィルターボタン */}
+      <button
+        className="product-list__mobile-filter-btn"
+        onClick={openFilterDrawer}
+        aria-label="フィルターを開く"
+      >
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4h18M3 12h18M3 20h18" />
+        </svg>
+      </button>
+
+      {/* フィルタードロワー */}
+      <div className={`product-list__filter-drawer ${isFilterDrawerOpen ? 'product-list__filter-drawer--open' : ''}`}>
+        <div className="product-list__drawer-header">
+          <h2 className="product-list__drawer-title">フィルター</h2>
+          <button
+            className="product-list__drawer-close"
+            onClick={closeFilterDrawer}
+            aria-label="フィルターを閉じる"
+          >
+            ✕
+          </button>
+        </div>
+
+        <div className="product-list__sidebar-header">
+          <button
+            className="product-list__reset-button"
+            onClick={handleResetFilters}
+            disabled={activeFilterCount === 0}
+          >
+            すべてリセット {activeFilterCount > 0 && `(${activeFilterCount})`}
+          </button>
+        </div>
+
+        {/* カテゴリーフィルター */}
+        <div className="product-list__filter-section">
+          <h3 className="product-list__filter-title">カテゴリー</h3>
+          <div className="product-list__filter-options">
+            {categories.map(category => (
+              <label key={category} className="product-list__filter-option">
+                <input
+                  type="radio"
+                  name="category-mobile"
+                  value={category}
+                  checked={selectedCategory === category}
+                  onChange={(e) => setSelectedCategory(e.target.value)}
+                />
+                <span>{category === 'all' ? 'すべて' : category}</span>
+              </label>
+            ))}
+          </div>
+        </div>
+
+        {/* 価格フィルター */}
+        <PriceFilter
+          min={0}
+          max={50000}
+          currentMin={priceRange.min}
+          currentMax={priceRange.max}
+          onPriceChange={(min, max) => setPriceRange({ min, max })}
+        />
+
+        {/* 割引フィルター */}
+        <DiscountFilter
+          selectedDiscounts={selectedDiscounts}
+          onDiscountChange={setSelectedDiscounts}
+        />
+
+        {/* 新着・人気フィルター */}
+        <TrendingFilter
+          selectedOption={selectedTrending}
+          onFilterChange={setSelectedTrending}
+        />
+
+        {/* ブランドフィルター */}
+        {brands.length > 0 && (
+          <BrandFilter
+            brands={brands}
+            selectedBrands={selectedBrands}
+            onBrandChange={setSelectedBrands}
+          />
+        )}
+
+        {/* レビューフィルター */}
+        <RatingFilter
+          selectedRating={selectedRating}
+          minReviews={minReviewCount}
+          onRatingChange={setSelectedRating}
+          onMinReviewsChange={setMinReviewCount}
+        />
+
+        {/* 在庫フィルター */}
+        <StockFilter
+          selectedOptions={selectedStockFilter}
+          onFilterChange={setSelectedStockFilter}
+        />
+      </div>
+
+      {/* オーバーレイ */}
+      <div
+        className={`product-list__overlay ${isFilterDrawerOpen ? 'product-list__overlay--visible' : ''}`}
+        onClick={closeFilterDrawer}
+      ></div>
     </div>
   );
 };

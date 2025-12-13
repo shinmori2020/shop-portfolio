@@ -2,13 +2,13 @@ import React from 'react';
 import './DiscountFilter.css';
 
 interface DiscountFilterProps {
-  selectedOptions: string[];
-  onFilterChange: (options: string[]) => void;
+  selectedDiscounts: string[];
+  onDiscountChange: (options: string[]) => void;
 }
 
 export const DiscountFilter: React.FC<DiscountFilterProps> = ({
-  selectedOptions,
-  onFilterChange
+  selectedDiscounts,
+  onDiscountChange
 }) => {
   const discountOptions = [
     { id: 'timesale', label: '本日のタイムセール', value: 'timesale' },
@@ -19,21 +19,21 @@ export const DiscountFilter: React.FC<DiscountFilterProps> = ({
   ];
 
   const handleCheckboxChange = (value: string) => {
-    const newOptions = selectedOptions.includes(value)
-      ? selectedOptions.filter(opt => opt !== value)
-      : [...selectedOptions, value];
-    onFilterChange(newOptions);
+    const newOptions = selectedDiscounts.includes(value)
+      ? selectedDiscounts.filter(opt => opt !== value)
+      : [...selectedDiscounts, value];
+    onDiscountChange(newOptions);
   };
 
   const clearAll = () => {
-    onFilterChange([]);
+    onDiscountChange([]);
   };
 
   return (
     <div className="discount-filter">
       <div className="discount-filter__header">
         <h3 className="discount-filter__title">お買い得品&割引</h3>
-        {selectedOptions.length > 0 && (
+        {selectedDiscounts.length > 0 && (
           <button
             className="discount-filter__clear"
             onClick={clearAll}
@@ -49,7 +49,7 @@ export const DiscountFilter: React.FC<DiscountFilterProps> = ({
             <input
               type="checkbox"
               className="discount-filter__checkbox"
-              checked={selectedOptions.includes(option.value)}
+              checked={selectedDiscounts.includes(option.value)}
               onChange={() => handleCheckboxChange(option.value)}
             />
             <span className="discount-filter__label">{option.label}</span>

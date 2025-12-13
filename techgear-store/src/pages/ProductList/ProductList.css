@@ -283,6 +283,109 @@
   }
 }
 
+/* モバイルフィルターボタン（デフォルトは非表示） */
+.product-list__mobile-filter-btn {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 56px;
+  height: 56px;
+  background: var(--color-primary);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  cursor: pointer;
+  z-index: 100;
+  transition: all 0.3s ease;
+}
+
+.product-list__mobile-filter-btn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+}
+
+/* フィルタードロワー */
+.product-list__filter-drawer {
+  position: fixed;
+  top: 0;
+  left: -100%;
+  bottom: 0; /* 画面下まで確実に伸ばす */
+  width: 85%;
+  max-width: 320px;
+  height: 100vh;
+  height: 100dvh; /* 動的ビューポート高さ */
+  background: white;
+  box-shadow: 2px 0 12px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  transition: left 0.3s ease;
+  overflow-y: auto;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.product-list__filter-drawer--open {
+  left: 0;
+}
+
+/* ドロワーヘッダー */
+.product-list__drawer-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 15px;
+  border-bottom: 2px solid #f0f0f0;
+}
+
+.product-list__drawer-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+}
+
+.product-list__drawer-close {
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: #666;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s ease;
+}
+
+.product-list__drawer-close:hover {
+  color: #000;
+}
+
+/* オーバーレイ */
+.product-list__overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0);
+  z-index: 999;
+  display: none;
+  transition: background 0.3s ease;
+  pointer-events: none;
+}
+
+.product-list__overlay--visible {
+  display: block;
+  background: rgba(0, 0, 0, 0.5);
+  pointer-events: auto;
+}
+
 /* タブレット */
 @media (max-width: 1024px) {
   .product-list__sidebar {
@@ -290,51 +393,183 @@
   }
 
   .product-list__grid {
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    grid-template-columns: repeat(2, 1fr);
   }
 }
 
 /* モバイル */
 @media (max-width: 768px) {
   .product-list {
-    padding: var(--spacing-lg) var(--spacing-md);
+    padding: var(--spacing-md) var(--spacing-sm);
+    overflow-x: hidden;
   }
 
   .product-list__content-wrapper {
     flex-direction: column;
   }
 
+  /* デスクトップのサイドバーを非表示 */
   .product-list__sidebar {
-    width: 100%;
-    order: -1;
+    display: none;
   }
 
-  .product-list__filter-section {
-    margin-bottom: var(--spacing-lg);
+  /* モバイルフィルターボタンを表示 */
+  .product-list__mobile-filter-btn {
+    display: flex;
+  }
+
+  .product-list__main {
+    width: 100%;
   }
 
   .product-list__controls {
     flex-direction: column;
     gap: var(--spacing-md);
-    align-items: flex-start;
+    align-items: stretch;
+    padding: var(--spacing-md);
+  }
+
+  .product-list__count {
+    text-align: center;
+    margin-bottom: var(--spacing-sm);
   }
 
   .product-list__sort {
     width: 100%;
+    justify-content: space-between;
   }
 
   .product-list__select {
     width: 100%;
+    min-width: unset;
   }
 
+  /* グリッドを2カラムに */
   .product-list__grid {
-    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    grid-template-columns: repeat(2, 1fr);
     gap: var(--spacing-md);
   }
 }
 
+/* 小型モバイル対応 - 1カラムに */
 @media (max-width: 480px) {
+  .product-list {
+    padding: var(--spacing-sm);
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+
+  .product-list__content-wrapper {
+    max-width: 100%;
+  }
+
+  .product-list__main {
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+
+  /* モバイルフィルターボタンの位置調整 */
+  .product-list__mobile-filter-btn {
+    right: 10px;
+    bottom: 10px;
+    width: 48px;
+    height: 48px;
+  }
+
+  /* フィルタードロワーを画面全体に */
+  .product-list__filter-drawer {
+    width: 90%;
+    max-width: none;
+    padding: 15px;
+  }
+
+  /* グリッドを1カラムに変更 */
   .product-list__grid {
     grid-template-columns: 1fr;
+    gap: var(--spacing-lg);
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .product-list__controls {
+    padding: var(--spacing-sm);
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  /* 検索セクションの調整 */
+  .product-list__search-section {
+    width: 100%;
+    max-width: 100%;
+    padding: 0 var(--spacing-sm);
+    box-sizing: border-box;
+  }
+}
+
+/* 超小型モバイル対応（320px以下） */
+@media (max-width: 320px) {
+  /* ビューポート全体の制限 */
+  #root {
+    max-width: 100vw;
+    overflow-x: hidden;
+  }
+
+  .product-list {
+    padding: 8px;
+    max-width: calc(100vw - 16px); /* パディングを考慮 */
+    margin: 0 auto;
+  }
+
+  /* モバイルフィルターボタンを画面内に収める */
+  .product-list__mobile-filter-btn {
+    position: fixed;
+    right: min(8px, 2vw); /* 画面サイズに応じて調整 */
+    bottom: min(8px, 2vh);
+    width: min(44px, 13vw); /* 画面幅の13%以下に制限 */
+    height: min(44px, 13vw);
+  }
+
+  /* フィルタードロワーを画面幅に最適化 */
+  .product-list__filter-drawer {
+    width: calc(100vw - 20px); /* 画面幅から余白を引く */
+    max-width: 100%;
+    padding: 12px;
+    left: -100vw; /* 初期位置を画面外に */
+  }
+
+  .product-list__filter-drawer--open {
+    left: 0;
+  }
+
+  /* コンテンツエリアの制限 */
+  .product-list__content-wrapper,
+  .product-list__main,
+  .product-list__header,
+  .product-list__search-section {
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+
+  .product-list__grid {
+    padding: 0;
+    width: 100%;
+    overflow-x: hidden;
+  }
+
+  /* 商品カードの幅制限 */
+  .product-list__grid > * {
+    max-width: calc(100vw - 16px);
+    overflow: hidden;
+  }
+
+  /* タイトルとコントロールの調整 */
+  .product-list__title {
+    font-size: 24px;
+    word-break: break-word;
+  }
+
+  .product-list__controls {
+    flex-direction: column;
+    padding: 8px;
   }
 }
