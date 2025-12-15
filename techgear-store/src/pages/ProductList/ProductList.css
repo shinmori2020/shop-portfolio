@@ -146,10 +146,11 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: var(--spacing-xl);
-  padding: var(--spacing-md);
+  padding: var(--spacing-lg);
   background: white;
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-sm);
+  border: 2px solid var(--color-border);
+  border-radius: 0;
+  box-shadow: none;
   animation: slideUp 0.6s ease-out 0.2s backwards;
 }
 
@@ -193,8 +194,8 @@
 
 .product-list__select:focus {
   outline: none;
-  border-color: var(--color-primary);
-  box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
+  border-color: var(--color-gray-200);
+  box-shadow: none;
 }
 
 /* グリッド */

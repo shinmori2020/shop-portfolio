@@ -112,10 +112,25 @@ export const ProductList: React.FC = () => {
     setSearchParams(params);
   }, [searchQuery, selectedCategory, selectedBrands, selectedDiscounts, selectedStockFilter, selectedRating, minReviewCount, selectedTrending, priceRange, sortBy, setSearchParams]);
 
-  // カテゴリー一覧を取得
+  // カテゴリー一覧を取得（固定リスト + 商品から取得したカテゴリ）
   const categories = useMemo(() => {
-    const uniqueCategories = Array.from(new Set(products.map(p => p.category)));
-    return ['all', ...uniqueCategories];
+    const fixedCategories = [
+      'ワイヤレスイヤホン',
+      'スマートウォッチ',
+      'Bluetoothスピーカー',
+      'モバイルバッテリー',
+      'ケーブル・アクセサリー',
+      'ヘッドホン',
+      'キーボード',
+      'マウス',
+      'Webカメラ',
+      'タブレット',
+      'ノートパソコン'
+    ];
+    const productCategories = Array.from(new Set(products.map(p => p.category)));
+    // 固定カテゴリと商品カテゴリをマージ（重複を除く）
+    const allCategories = Array.from(new Set([...fixedCategories, ...productCategories]));
+    return ['all', ...allCategories];
   }, [products]);
 
   // ブランド一覧を取得

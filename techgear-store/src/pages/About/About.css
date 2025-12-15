@@ -1,0 +1,417 @@
+.about {
+  animation: fadeIn 0.6s ease-out;
+}
+
+/* ヒーローセクション */
+.about__hero {
+  background: linear-gradient(135deg, #000 0%, #333 100%);
+  color: white;
+  padding: var(--spacing-4xl) var(--spacing-lg);
+  text-align: center;
+}
+
+.about__hero-content {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.about__title {
+  font-size: clamp(36px, 6vw, 56px);
+  font-weight: 800;
+  margin: 0 0 var(--spacing-md) 0;
+  letter-spacing: 2px;
+  font-family: 'Rajdhani', sans-serif;
+}
+
+.about__subtitle {
+  font-size: clamp(16px, 2vw, 20px);
+  margin: 0;
+  opacity: 0.9;
+  font-weight: 300;
+  letter-spacing: 1px;
+}
+
+/* コンテナ */
+.about__container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 var(--spacing-lg);
+}
+
+/* セクション共通 */
+.about__intro,
+.about__categories,
+.about__features,
+.about__tech,
+.about__contact {
+  padding: var(--spacing-4xl) 0;
+}
+
+.about__intro {
+  background: white;
+}
+
+.about__categories {
+  background: #f8f9fa;
+}
+
+.about__features {
+  background: white;
+}
+
+.about__tech {
+  background: #f8f9fa;
+}
+
+.about__contact {
+  background: white;
+}
+
+.about__section-title {
+  font-size: clamp(28px, 4vw, 36px);
+  font-weight: 800;
+  color: #000;
+  margin: 0 0 var(--spacing-xl) 0;
+  text-align: center;
+  position: relative;
+  padding-bottom: var(--spacing-md);
+}
+
+.about__section-title::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80px;
+  height: 4px;
+  background: #000;
+  border-radius: var(--radius-full);
+}
+
+/* 紹介セクション */
+.about__description {
+  font-size: 16px;
+  line-height: 1.8;
+  color: var(--color-text-secondary);
+  margin: 0 0 var(--spacing-lg) 0;
+  text-align: left;
+  max-width: 800px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* カテゴリグリッド */
+.about__category-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: var(--spacing-md);
+  margin-top: var(--spacing-xl);
+}
+
+.about__category-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-lg);
+  background: white;
+  border: 2px solid var(--color-border);
+  transition: all 0.3s ease;
+}
+
+.about__category-card:hover {
+  transform: translateY(-4px);
+  border-color: var(--color-text-primary);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.about__category-icon {
+  font-size: 32px;
+}
+
+.about__category-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  text-align: center;
+}
+
+/* 特徴グリッド */
+.about__feature-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: var(--spacing-xl);
+  margin-top: var(--spacing-xl);
+}
+
+.about__feature-card {
+  padding: var(--spacing-xl);
+  background: white;
+  border: 2px solid var(--color-border);
+  text-align: center;
+  transition: all 0.3s ease;
+}
+
+.about__feature-card:hover {
+  transform: translateY(-4px);
+  border-color: var(--color-text-primary);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.about__feature-icon {
+  font-size: 48px;
+  margin-bottom: var(--spacing-md);
+}
+
+.about__feature-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin: 0 0 var(--spacing-sm) 0;
+  font-family: 'Rajdhani', sans-serif;
+}
+
+.about__feature-description {
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+/* 技術スタック */
+.about__tech-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--spacing-lg);
+  margin-top: var(--spacing-xl);
+}
+
+.about__tech-item {
+  padding: var(--spacing-lg);
+  background: white;
+  border: 2px solid var(--color-border);
+  text-align: center;
+}
+
+.about__tech-item h4 {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin: 0 0 var(--spacing-sm) 0;
+  font-family: 'Rajdhani', sans-serif;
+  text-transform: uppercase;
+}
+
+.about__tech-item p {
+  font-size: 14px;
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+/* お問い合わせフォーム */
+.about__contact-form {
+  max-width: 1200px;
+  margin: var(--spacing-xl) auto 0;
+  padding: var(--spacing-xl);
+  background: white;
+  border: 2px solid var(--color-border);
+}
+
+.about__form-row {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--spacing-lg);
+  margin-bottom: var(--spacing-lg);
+}
+
+.about__form-group {
+  margin-bottom: var(--spacing-lg);
+}
+
+.about__form-row .about__form-group {
+  margin-bottom: 0;
+}
+
+.about__form-label {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin-bottom: var(--spacing-sm);
+}
+
+.about__form-input,
+.about__form-select,
+.about__form-textarea {
+  width: 100%;
+  padding: var(--spacing-md);
+  font-size: 14px;
+  color: var(--color-text-primary);
+  border: 2px solid var(--color-border);
+  border-radius: 0;
+  background: white;
+  transition: border-color 0.2s ease;
+  font-family: inherit;
+  box-sizing: border-box;
+}
+
+.about__form-input:focus,
+.about__form-select:focus,
+.about__form-textarea:focus {
+  outline: none;
+  border-color: var(--color-text-primary);
+}
+
+.about__form-select {
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23333' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 40px;
+}
+
+.about__form-textarea {
+  resize: vertical;
+  min-height: 120px;
+}
+
+.about__form-submit {
+  width: 100%;
+  padding: var(--spacing-md) var(--spacing-xl);
+  font-size: 16px;
+  font-weight: 700;
+  color: white;
+  background: #000;
+  border: 2px solid #000;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-family: 'Rajdhani', sans-serif;
+}
+
+.about__form-submit:hover {
+  background: white;
+  color: #000;
+}
+
+.about__contact-note {
+  font-size: 12px;
+  color: var(--color-text-tertiary);
+  margin: var(--spacing-md) 0 0 0;
+  text-align: center;
+  font-style: italic;
+}
+
+/* アニメーション */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* タブレット */
+@media (max-width: 1024px) {
+  .about__category-grid {
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  }
+
+  .about__feature-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* モバイル */
+@media (max-width: 768px) {
+  .about__hero {
+    padding: var(--spacing-3xl) var(--spacing-md);
+  }
+
+  .about__intro,
+  .about__categories,
+  .about__features,
+  .about__tech,
+  .about__contact {
+    padding: var(--spacing-2xl) 0;
+  }
+
+  .about__container {
+    padding: 0 var(--spacing-md);
+  }
+
+  .about__category-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--spacing-sm);
+  }
+
+  .about__category-card {
+    padding: var(--spacing-md);
+  }
+
+  .about__category-icon {
+    font-size: 24px;
+  }
+
+  .about__category-name {
+    font-size: 12px;
+  }
+
+  .about__feature-grid {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-md);
+  }
+
+  .about__feature-card {
+    padding: var(--spacing-lg);
+  }
+
+  .about__tech-list {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-md);
+  }
+
+  .about__contact-form {
+    padding: var(--spacing-lg);
+  }
+
+  .about__form-row {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+
+  .about__form-row .about__form-group {
+    margin-bottom: var(--spacing-lg);
+  }
+}
+
+/* 小型モバイル */
+@media (max-width: 480px) {
+  .about__hero {
+    padding: var(--spacing-2xl) var(--spacing-sm);
+  }
+
+  .about__container {
+    padding: 0 var(--spacing-sm);
+  }
+
+  .about__section-title {
+    font-size: 24px;
+  }
+
+  .about__description {
+    font-size: 14px;
+  }
+
+  .about__category-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .about__feature-icon {
+    font-size: 36px;
+  }
+}

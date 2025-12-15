@@ -1,0 +1,194 @@
+.commercial {
+  background: white;
+  min-height: 100vh;
+  padding: var(--spacing-4xl) 0;
+  animation: fadeIn 0.6s ease-out;
+}
+
+.commercial__container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 0 var(--spacing-lg);
+}
+
+.commercial__title {
+  font-size: clamp(28px, 4vw, 36px);
+  font-weight: 800;
+  color: #000;
+  margin: 0 0 var(--spacing-md) 0;
+  text-align: center;
+  position: relative;
+  padding-bottom: var(--spacing-md);
+}
+
+.commercial__title::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80px;
+  height: 4px;
+  background: #000;
+  border-radius: var(--radius-full);
+}
+
+.commercial__notice {
+  background: #fff3cd;
+  border: 2px solid #ffc107;
+  padding: var(--spacing-md);
+  margin-bottom: var(--spacing-2xl);
+  border-radius: 4px;
+}
+
+.commercial__notice p {
+  margin: 0;
+  font-size: 14px;
+  color: #856404;
+  font-weight: 600;
+}
+
+.commercial__table {
+  margin-bottom: var(--spacing-2xl);
+}
+
+.commercial__row {
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  border-bottom: 1px solid var(--color-border);
+  min-height: 60px;
+}
+
+.commercial__row:first-child {
+  border-top: 2px solid var(--color-border);
+}
+
+.commercial__row:last-child {
+  border-bottom: 2px solid var(--color-border);
+}
+
+.commercial__label {
+  background: #f8f9fa;
+  padding: var(--spacing-md);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  display: flex;
+  align-items: center;
+  border-right: 1px solid var(--color-border);
+}
+
+.commercial__value {
+  padding: var(--spacing-md);
+  font-size: 15px;
+  line-height: 1.8;
+  color: var(--color-text-secondary);
+  display: flex;
+  align-items: center;
+}
+
+.commercial__value strong {
+  color: var(--color-text-primary);
+  font-weight: 700;
+}
+
+.commercial__section {
+  margin-top: var(--spacing-2xl);
+  padding-top: var(--spacing-xl);
+  border-top: 2px solid var(--color-border);
+}
+
+.commercial__section-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin: 0 0 var(--spacing-md) 0;
+  font-family: 'Rajdhani', sans-serif;
+}
+
+.commercial__text {
+  font-size: 15px;
+  line-height: 1.8;
+  color: var(--color-text-secondary);
+  margin: 0 0 var(--spacing-md) 0;
+}
+
+.commercial__contact {
+  background: #f8f9fa;
+  padding: var(--spacing-lg);
+  border: 2px solid var(--color-border);
+}
+
+.commercial__contact p {
+  margin: 0 0 var(--spacing-sm) 0;
+  font-size: 15px;
+  color: var(--color-text-secondary);
+}
+
+.commercial__contact p:last-child {
+  margin-bottom: 0;
+}
+
+.commercial__contact strong {
+  color: var(--color-text-primary);
+  font-weight: 700;
+}
+
+/* アニメーション */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* タブレット */
+@media (max-width: 768px) {
+  .commercial {
+    padding: var(--spacing-2xl) 0;
+  }
+
+  .commercial__container {
+    padding: 0 var(--spacing-md);
+  }
+
+  .commercial__row {
+    grid-template-columns: 1fr;
+    min-height: auto;
+  }
+
+  .commercial__label {
+    border-right: none;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .commercial__value {
+    padding-top: var(--spacing-sm);
+  }
+}
+
+/* 小型モバイル */
+@media (max-width: 480px) {
+  .commercial {
+    padding: var(--spacing-xl) 0;
+  }
+
+  .commercial__container {
+    padding: 0 var(--spacing-sm);
+  }
+
+  .commercial__title {
+    font-size: 20px;
+  }
+
+  .commercial__label,
+  .commercial__value {
+    font-size: 14px;
+  }
+
+  .commercial__contact {
+    padding: var(--spacing-md);
+  }
+}

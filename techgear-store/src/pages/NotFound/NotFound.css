@@ -1,0 +1,204 @@
+.notfound {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  padding: var(--spacing-xl);
+}
+
+.notfound__container {
+  max-width: 600px;
+  width: 100%;
+}
+
+.notfound__content {
+  background: white;
+  padding: var(--spacing-4xl) var(--spacing-2xl);
+  border: 2px solid var(--color-border);
+  text-align: center;
+  animation: fadeInUp 0.6s ease-out;
+}
+
+.notfound__code {
+  font-size: clamp(80px, 15vw, 120px);
+  font-weight: 800;
+  color: #000;
+  margin: 0;
+  line-height: 1;
+  font-family: 'Rajdhani', sans-serif;
+  letter-spacing: -0.02em;
+}
+
+.notfound__title {
+  font-size: clamp(24px, 4vw, 32px);
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin: var(--spacing-md) 0;
+  font-family: 'Rajdhani', sans-serif;
+}
+
+.notfound__message {
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--color-text-secondary);
+  margin: 0 0 var(--spacing-2xl) 0;
+}
+
+.notfound__actions {
+  display: flex;
+  gap: var(--spacing-md);
+  justify-content: center;
+  margin-bottom: var(--spacing-2xl);
+  flex-wrap: wrap;
+}
+
+.notfound__button {
+  padding: var(--spacing-md) var(--spacing-xl);
+  font-size: 16px;
+  font-weight: 700;
+  border: 2px solid #000;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-family: 'Rajdhani', sans-serif;
+  min-width: 200px;
+}
+
+.notfound__button--primary {
+  background: #000;
+  color: white;
+}
+
+.notfound__button--primary:hover {
+  background: white;
+  color: #000;
+}
+
+.notfound__button--secondary {
+  background: white;
+  color: #000;
+}
+
+.notfound__button--secondary:hover {
+  background: #000;
+  color: white;
+}
+
+.notfound__links {
+  margin-top: var(--spacing-2xl);
+  padding-top: var(--spacing-2xl);
+  border-top: 2px solid var(--color-border);
+}
+
+.notfound__links-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin: 0 0 var(--spacing-md) 0;
+  font-family: 'Rajdhani', sans-serif;
+}
+
+.notfound__links-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.notfound__links-list li a {
+  color: var(--color-text-secondary);
+  text-decoration: none;
+  font-size: 15px;
+  font-weight: 600;
+  transition: color 0.2s ease;
+  display: inline-block;
+  position: relative;
+}
+
+.notfound__links-list li a::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: #000;
+  transition: width 0.3s ease;
+}
+
+.notfound__links-list li a:hover {
+  color: #000;
+}
+
+.notfound__links-list li a:hover::after {
+  width: 100%;
+}
+
+/* アニメーション */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* タブレット */
+@media (max-width: 768px) {
+  .notfound__content {
+    padding: var(--spacing-2xl) var(--spacing-lg);
+  }
+
+  .notfound__code {
+    font-size: 80px;
+  }
+
+  .notfound__title {
+    font-size: 24px;
+  }
+
+  .notfound__actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .notfound__button {
+    width: 100%;
+  }
+}
+
+/* 小型モバイル */
+@media (max-width: 480px) {
+  .notfound {
+    padding: var(--spacing-md);
+  }
+
+  .notfound__content {
+    padding: var(--spacing-xl) var(--spacing-md);
+  }
+
+  .notfound__code {
+    font-size: 60px;
+  }
+
+  .notfound__title {
+    font-size: 20px;
+  }
+
+  .notfound__message {
+    font-size: 14px;
+  }
+
+  .notfound__button {
+    font-size: 14px;
+    padding: var(--spacing-sm) var(--spacing-lg);
+    min-width: 0;
+  }
+}

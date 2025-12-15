@@ -1,0 +1,171 @@
+.terms {
+  background: white;
+  min-height: 100vh;
+  padding: var(--spacing-4xl) 0;
+  animation: fadeIn 0.6s ease-out;
+}
+
+.terms__container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 0 var(--spacing-lg);
+}
+
+.terms__title {
+  font-size: clamp(28px, 4vw, 36px);
+  font-weight: 800;
+  color: #000;
+  margin: 0 0 var(--spacing-md) 0;
+  text-align: center;
+  position: relative;
+  padding-bottom: var(--spacing-md);
+}
+
+.terms__title::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80px;
+  height: 4px;
+  background: #000;
+  border-radius: var(--radius-full);
+}
+
+.terms__updated {
+  text-align: center;
+  font-size: 14px;
+  color: var(--color-text-tertiary);
+  margin: 0 0 var(--spacing-2xl) 0;
+}
+
+.terms__section {
+  margin-bottom: var(--spacing-2xl);
+  padding-bottom: var(--spacing-xl);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.terms__section:last-child {
+  border-bottom: none;
+}
+
+.terms__section-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin: 0 0 var(--spacing-md) 0;
+  font-family: 'Rajdhani', sans-serif;
+}
+
+.terms__text {
+  font-size: 15px;
+  line-height: 1.8;
+  color: var(--color-text-secondary);
+  margin: 0 0 var(--spacing-md) 0;
+}
+
+.terms__text:last-child {
+  margin-bottom: 0;
+}
+
+.terms__note {
+  font-size: 14px;
+  color: var(--color-text-tertiary);
+  background: #f8f9fa;
+  padding: var(--spacing-md);
+  border-left: 4px solid #000;
+  margin: var(--spacing-md) 0 0 0;
+  font-style: italic;
+}
+
+.terms__list {
+  margin: 0;
+  padding-left: var(--spacing-xl);
+  font-size: 15px;
+  line-height: 1.8;
+  color: var(--color-text-secondary);
+}
+
+.terms__list li {
+  margin-bottom: var(--spacing-md);
+}
+
+.terms__list li:last-child {
+  margin-bottom: 0;
+}
+
+.terms__sublist {
+  margin-top: var(--spacing-sm);
+  padding-left: var(--spacing-lg);
+  list-style-type: circle;
+}
+
+.terms__sublist li {
+  margin-bottom: var(--spacing-sm);
+}
+
+.terms__end {
+  text-align: right;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin: var(--spacing-xl) 0 0 0;
+}
+
+/* アニメーション */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* タブレット */
+@media (max-width: 768px) {
+  .terms {
+    padding: var(--spacing-2xl) 0;
+  }
+
+  .terms__container {
+    padding: 0 var(--spacing-md);
+  }
+
+  .terms__section {
+    margin-bottom: var(--spacing-xl);
+  }
+
+  .terms__section-title {
+    font-size: 18px;
+  }
+
+  .terms__text,
+  .terms__list {
+    font-size: 14px;
+  }
+}
+
+/* 小型モバイル */
+@media (max-width: 480px) {
+  .terms {
+    padding: var(--spacing-xl) 0;
+  }
+
+  .terms__container {
+    padding: 0 var(--spacing-sm);
+  }
+
+  .terms__title {
+    font-size: 24px;
+  }
+
+  .terms__section-title {
+    font-size: 16px;
+  }
+
+  .terms__list {
+    padding-left: var(--spacing-lg);
+  }
+}

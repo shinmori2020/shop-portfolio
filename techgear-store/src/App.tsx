@@ -6,6 +6,12 @@ import { Footer } from './components/layouts/Footer';
 import { Home } from './pages/Home';
 import { ProductList } from './pages/ProductList';
 import { ProductDetail } from './pages/ProductDetail';
+import { Categories } from './pages/Categories';
+import { About } from './pages/About';
+import { Terms } from './pages/Terms';
+import { Privacy } from './pages/Privacy';
+import { CommercialTransaction } from './pages/CommercialTransaction';
+import { NotFound } from './pages/NotFound';
 import { Cart } from './pages/Cart';
 import { Login } from './pages/Login';
 import { Register } from './pages/Register';
@@ -52,6 +58,11 @@ function App() {
               <Route path="/" element={<Home />} />
               <Route path="/products" element={<ProductList />} />
               <Route path="/products/:productId" element={<ProductDetail />} />
+              <Route path="/categories" element={<Categories />} />
+              <Route path="/about" element={<About />} />
+              <Route path="/terms" element={<Terms />} />
+              <Route path="/privacy" element={<Privacy />} />
+              <Route path="/commercial-transaction" element={<CommercialTransaction />} />
               <Route path="/cart" element={<Cart />} />
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
@@ -67,6 +78,9 @@ function App() {
               <Route path="/admin/customers" element={<AdminCustomers />} />
               <Route path="/admin/analytics" element={<AdminAnalytics />} />
               <Route path="/admin/settings" element={<AdminSettings />} />
+
+              {/* 404 Not Found - must be last */}
+              <Route path="*" element={<NotFound />} />
             </Routes>
           </main>
           <Footer />
