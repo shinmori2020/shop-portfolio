@@ -1,4 +1,5 @@
 import React, { useState, FormEvent, useRef, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import ReCAPTCHA from 'react-google-recaptcha';
 import emailjs from '@emailjs/browser';
 import './Contact.css';
@@ -8,6 +9,10 @@ const RATE_LIMIT_MAX = 3; // 1時間以内の最大送信回数
 const RATE_LIMIT_WINDOW = 60 * 60 * 1000; // 1時間（ミリ秒）
 const STORAGE_KEY = 'contact_submissions';
 
+// 自動保存の設定
+const DRAFT_STORAGE_KEY = 'contact_form_draft';
+const AUTOSAVE_DELAY = 500; // 500ms後に保存（デバウンス）
+
 // 禁止ワードリスト（スパムフィルタ）
 const SPAM_KEYWORDS = ['viagra', 'casino', 'lottery', 'winner', 'free money', 'click here'];
 
@@ -15,8 +20,24 @@ interface SubmissionHistory {
   timestamps: string[];
 }
 
+interface FormDraft {
+  name: string;
+  company: string;
+  email: string;
+  phone: string;
+  address: string;
+  category: string;
+  contactMethod: string;
+  subject: string;
+  message: string;
+  savedAt: string;
+}
+
 export const Contact: React.FC = () => {
+  const navigate = useNavigate();
   const recaptchaRef = useRef<ReCAPTCHA>(null);
+  const autosaveTimerRef = useRef<NodeJS.Timeout | null>(null);
+
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const [errorMessage, setErrorMessage] = useState('');
@@ -28,6 +49,20 @@ export const Contact: React.FC = () => {
     phone: '',
     message: '',
     subject: ''
+  });
+
+  // フォームの値を管理
+  const [formValues, setFormValues] = useState<FormDraft>({
+    name: '',
+    company: '',
+    email: '',
+    phone: '',
+    address: '',
+    category: '',
+    contactMethod: '',
+    subject: '',
+    message: '',
+    savedAt: ''
   });
 
   // レート制限のチェック
@@ -168,9 +203,73 @@ export const Contact: React.FC = () => {
     return { valid: true };
   };
 
-  // コンポーネントマウント時に残り回数を更新
+  // 下書きを保存
+  const saveDraft = () => {
+    const draft: FormDraft = {
+      ...formValues,
+      savedAt: new Date().toISOString()
+    };
+    localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(draft));
+  };
+
+  // 下書きを読み込み
+  const loadDraft = () => {
+    const draftStr = localStorage.getItem(DRAFT_STORAGE_KEY);
+    if (draftStr) {
+      try {
+        const draft: FormDraft = JSON.parse(draftStr);
+        return draft;
+      } catch (error) {
+        console.error('Failed to parse draft:', error);
+        return null;
+      }
+    }
+    return null;
+  };
+
+  // 下書きをクリア
+  const clearDraft = () => {
+    localStorage.removeItem(DRAFT_STORAGE_KEY);
+  };
+
+  // フォーム入力時のハンドラ（デバウンス付き自動保存）
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setFormValues(prev => ({ ...prev, [name]: value }));
+
+    // デバウンス処理
+    if (autosaveTimerRef.current) {
+      clearTimeout(autosaveTimerRef.current);
+    }
+
+    autosaveTimerRef.current = setTimeout(() => {
+      saveDraft();
+    }, AUTOSAVE_DELAY);
+  };
+
+  // コンポーネントマウント時の処理
   useEffect(() => {
     checkRateLimit();
+
+    // 下書きを自動復元
+    const draft = loadDraft();
+    if (draft && draft.savedAt) {
+      const hasContent = Object.entries(draft).some(
+        ([key, value]) => key !== 'savedAt' && value !== ''
+      );
+      if (hasContent) {
+        setFormValues(draft);
+      }
+    }
+  }, []);
+
+  // コンポーネントアンマウント時にタイマーをクリア
+  useEffect(() => {
+    return () => {
+      if (autosaveTimerRef.current) {
+        clearTimeout(autosaveTimerRef.current);
+      }
+    };
   }, []);
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
@@ -233,7 +332,7 @@ export const Contact: React.FC = () => {
         phone: formData.get('phone') as string,
         address: formData.get('address') as string,
         category: formData.get('category') as string,
-        contactMethod: formData.get('contact-method') as string,
+        contactMethod: formData.get('contactMethod') as string,
         subject: formData.get('subject') as string,
         message: formData.get('message') as string,
         'g-recaptcha-response': recaptchaToken,
@@ -246,12 +345,14 @@ export const Contact: React.FC = () => {
         import.meta.env.VITE_EMAILJS_PUBLIC_KEY
       );
 
-      setSubmitStatus('success');
-      form.reset();
-      // reCAPTCHAをリセット
-      recaptchaRef.current?.reset();
       // 送信履歴を更新
       updateSubmissionHistory();
+
+      // 下書きをクリア
+      clearDraft();
+
+      // 送信完了ページに遷移
+      navigate('/contact/success');
     } catch (error) {
       console.error('Form submission error:', error);
       setSubmitStatus('error');
@@ -289,6 +390,8 @@ export const Contact: React.FC = () => {
                   id="name"
                   name="name"
                   className="contact__form-input"
+                  value={formValues.name}
+                  onChange={handleInputChange}
                   required
                 />
               </div>
@@ -299,6 +402,8 @@ export const Contact: React.FC = () => {
                   id="company"
                   name="company"
                   className="contact__form-input"
+                  value={formValues.company}
+                  onChange={handleInputChange}
                 />
               </div>
             </div>
@@ -311,6 +416,8 @@ export const Contact: React.FC = () => {
                   id="email"
                   name="email"
                   className={`contact__form-input ${fieldErrors.email ? 'contact__form-input--error' : ''}`}
+                  value={formValues.email}
+                  onChange={handleInputChange}
                   required
                   onBlur={handleFieldBlur}
                 />
@@ -325,6 +432,8 @@ export const Contact: React.FC = () => {
                   id="phone"
                   name="phone"
                   className={`contact__form-input ${fieldErrors.phone ? 'contact__form-input--error' : ''}`}
+                  value={formValues.phone}
+                  onChange={handleInputChange}
                   placeholder="例: 03-1234-5678"
                   onBlur={handleFieldBlur}
                 />
@@ -341,6 +450,8 @@ export const Contact: React.FC = () => {
                 id="address"
                 name="address"
                 className="contact__form-input"
+                value={formValues.address}
+                onChange={handleInputChange}
                 placeholder="例: 東京都渋谷区..."
               />
             </div>
@@ -352,6 +463,8 @@ export const Contact: React.FC = () => {
                   id="category"
                   name="category"
                   className="contact__form-select"
+                  value={formValues.category}
+                  onChange={handleInputChange}
                   required
                 >
                   <option value="">選択してください</option>
@@ -367,8 +480,10 @@ export const Contact: React.FC = () => {
                 <label htmlFor="contact-method" className="contact__form-label">希望連絡方法 *</label>
                 <select
                   id="contact-method"
-                  name="contact-method"
+                  name="contactMethod"
                   className="contact__form-select"
+                  value={formValues.contactMethod}
+                  onChange={handleInputChange}
                   required
                 >
                   <option value="">選択してください</option>
@@ -385,6 +500,8 @@ export const Contact: React.FC = () => {
                 id="subject"
                 name="subject"
                 className={`contact__form-input ${fieldErrors.subject ? 'contact__form-input--error' : ''}`}
+                value={formValues.subject}
+                onChange={handleInputChange}
                 required
                 onBlur={handleFieldBlur}
               />
@@ -399,6 +516,8 @@ export const Contact: React.FC = () => {
                 id="message"
                 name="message"
                 className={`contact__form-textarea ${fieldErrors.message ? 'contact__form-textarea--error' : ''}`}
+                value={formValues.message}
+                onChange={handleInputChange}
                 rows={6}
                 required
                 onBlur={handleFieldBlur}

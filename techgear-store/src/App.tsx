@@ -9,6 +9,7 @@ import { ProductDetail } from './pages/ProductDetail';
 import { Categories } from './pages/Categories';
 import { About } from './pages/About';
 import { Contact } from './pages/Contact';
+import { ContactSuccess } from './pages/ContactSuccess';
 import { Terms } from './pages/Terms';
 import { Privacy } from './pages/Privacy';
 import { CommercialTransaction } from './pages/CommercialTransaction';
@@ -64,6 +65,7 @@ function App() {
                 <Route path="/categories" element={<Categories />} />
                 <Route path="/about" element={<About />} />
                 <Route path="/contact" element={<Contact />} />
+                <Route path="/contact/success" element={<ContactSuccess />} />
                 <Route path="/terms" element={<Terms />} />
                 <Route path="/privacy" element={<Privacy />} />
                 <Route path="/commercial-transaction" element={<CommercialTransaction />} />

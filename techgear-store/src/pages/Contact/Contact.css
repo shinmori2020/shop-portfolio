@@ -178,6 +178,62 @@
   font-weight: 500;
 }
 
+/* 下書き復元UI */
+.contact__draft-restore {
+  background: #e3f2fd;
+  border: 2px solid #2196F3;
+  padding: var(--spacing-lg);
+  margin-bottom: var(--spacing-xl);
+  text-align: center;
+}
+
+.contact__draft-restore-text {
+  font-size: 14px;
+  color: #1565C0;
+  margin: 0 0 var(--spacing-md) 0;
+  font-weight: 500;
+}
+
+.contact__draft-restore-actions {
+  display: flex;
+  gap: var(--spacing-md);
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.contact__draft-restore-button {
+  padding: var(--spacing-sm) var(--spacing-lg);
+  font-size: 14px;
+  font-weight: 600;
+  border: 2px solid;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: 'Rajdhani', sans-serif;
+  letter-spacing: 0.5px;
+}
+
+.contact__draft-restore-button--restore {
+  background: #2196F3;
+  color: white;
+  border-color: #2196F3;
+}
+
+.contact__draft-restore-button--restore:hover {
+  background: #1976D2;
+  border-color: #1976D2;
+}
+
+.contact__draft-restore-button--clear {
+  background: white;
+  color: #666;
+  border-color: #666;
+}
+
+.contact__draft-restore-button--clear:hover {
+  background: #666;
+  color: white;
+}
+
 /* フィールドエラー表示 - ブラウザデフォルト風の吹き出し */
 .contact__form-group {
   position: relative;
