@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faHeadphones,
@@ -141,123 +142,12 @@ export const About: React.FC = () => {
       <section className="about__contact">
         <div className="about__container">
           <h2 className="about__section-title">お問い合わせ</h2>
-          <form className="about__contact-form">
-            <div className="about__form-row">
-              <div className="about__form-group">
-                <label htmlFor="name" className="about__form-label">お名前 *</label>
-                <input
-                  type="text"
-                  id="name"
-                  name="name"
-                  className="about__form-input"
-                  required
-                />
-              </div>
-              <div className="about__form-group">
-                <label htmlFor="company" className="about__form-label">会社名・組織名</label>
-                <input
-                  type="text"
-                  id="company"
-                  name="company"
-                  className="about__form-input"
-                />
-              </div>
-            </div>
-
-            <div className="about__form-row">
-              <div className="about__form-group">
-                <label htmlFor="email" className="about__form-label">メールアドレス *</label>
-                <input
-                  type="email"
-                  id="email"
-                  name="email"
-                  className="about__form-input"
-                  required
-                />
-              </div>
-              <div className="about__form-group">
-                <label htmlFor="phone" className="about__form-label">電話番号</label>
-                <input
-                  type="tel"
-                  id="phone"
-                  name="phone"
-                  className="about__form-input"
-                  placeholder="例: 03-1234-5678"
-                />
-              </div>
-            </div>
-
-            <div className="about__form-group">
-              <label htmlFor="address" className="about__form-label">ご住所</label>
-              <input
-                type="text"
-                id="address"
-                name="address"
-                className="about__form-input"
-                placeholder="例: 東京都渋谷区..."
-              />
-            </div>
-
-            <div className="about__form-row">
-              <div className="about__form-group">
-                <label htmlFor="category" className="about__form-label">お問い合わせ種別 *</label>
-                <select
-                  id="category"
-                  name="category"
-                  className="about__form-select"
-                  required
-                >
-                  <option value="">選択してください</option>
-                  <option value="product">商品について</option>
-                  <option value="shipping">配送について</option>
-                  <option value="return">返品・交換について</option>
-                  <option value="payment">お支払いについて</option>
-                  <option value="account">アカウントについて</option>
-                  <option value="other">その他</option>
-                </select>
-              </div>
-              <div className="about__form-group">
-                <label htmlFor="contact-method" className="about__form-label">希望連絡方法 *</label>
-                <select
-                  id="contact-method"
-                  name="contact-method"
-                  className="about__form-select"
-                  required
-                >
-                  <option value="">選択してください</option>
-                  <option value="email">メール</option>
-                  <option value="phone">電話</option>
-                </select>
-              </div>
-            </div>
-
-            <div className="about__form-group">
-              <label htmlFor="subject" className="about__form-label">件名 *</label>
-              <input
-                type="text"
-                id="subject"
-                name="subject"
-                className="about__form-input"
-                required
-              />
-            </div>
-
-            <div className="about__form-group">
-              <label htmlFor="message" className="about__form-label">お問い合わせ内容 *</label>
-              <textarea
-                id="message"
-                name="message"
-                className="about__form-textarea"
-                rows={6}
-                required
-              ></textarea>
-            </div>
-
-            <button type="submit" className="about__form-submit">送信する</button>
-            <p className="about__contact-note">
-              ※このサイトはポートフォリオプロジェクトです。実際のフォーム送信は行われません。
-            </p>
-          </form>
+          <p className="about__contact-text">
+            商品やサービスに関するご質問・ご相談がございましたら、お気軽にお問い合わせください。
+          </p>
+          <Link to="/contact" className="about__contact-button">
+            お問い合わせフォームはこちら
+          </Link>
         </div>
       </section>
     </div>

@@ -8,6 +8,7 @@ import { ProductList } from './pages/ProductList';
 import { ProductDetail } from './pages/ProductDetail';
 import { Categories } from './pages/Categories';
 import { About } from './pages/About';
+import { Contact } from './pages/Contact';
 import { Terms } from './pages/Terms';
 import { Privacy } from './pages/Privacy';
 import { CommercialTransaction } from './pages/CommercialTransaction';
@@ -29,6 +30,7 @@ import './App.css';
 
 function App() {
   useEffect(() => {
+    console.log('reCAPTCHA Site Key:', import.meta.env.VITE_RECAPTCHA_SITE_KEY);
     // localStorage内のカートデータをチェック
     const cartData = localStorage.getItem('cart-storage');
     if (cartData) {
@@ -48,45 +50,47 @@ function App() {
       }
     }
   }, []);
+
   return (
     <Router>
-      <AuthProvider>
-        <div className="app">
-          <Header />
-          <main className="app__content">
-            <Routes>
-              <Route path="/" element={<Home />} />
-              <Route path="/products" element={<ProductList />} />
-              <Route path="/products/:productId" element={<ProductDetail />} />
-              <Route path="/categories" element={<Categories />} />
-              <Route path="/about" element={<About />} />
-              <Route path="/terms" element={<Terms />} />
-              <Route path="/privacy" element={<Privacy />} />
-              <Route path="/commercial-transaction" element={<CommercialTransaction />} />
-              <Route path="/cart" element={<Cart />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/register" element={<Register />} />
-              <Route path="/checkout" element={<Checkout />} />
-              <Route path="/order-complete" element={<OrderComplete />} />
-              <Route path="/orders" element={<Orders />} />
-              <Route path="/account" element={<Account />} />
+        <AuthProvider>
+          <div className="app">
+            <Header />
+            <main className="app__content">
+              <Routes>
+                <Route path="/" element={<Home />} />
+                <Route path="/products" element={<ProductList />} />
+                <Route path="/products/:productId" element={<ProductDetail />} />
+                <Route path="/categories" element={<Categories />} />
+                <Route path="/about" element={<About />} />
+                <Route path="/contact" element={<Contact />} />
+                <Route path="/terms" element={<Terms />} />
+                <Route path="/privacy" element={<Privacy />} />
+                <Route path="/commercial-transaction" element={<CommercialTransaction />} />
+                <Route path="/cart" element={<Cart />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/register" element={<Register />} />
+                <Route path="/checkout" element={<Checkout />} />
+                <Route path="/order-complete" element={<OrderComplete />} />
+                <Route path="/orders" element={<Orders />} />
+                <Route path="/account" element={<Account />} />
 
-              {/* Admin Routes */}
-              <Route path="/admin" element={<AdminDashboard />} />
-              <Route path="/admin/products" element={<AdminProducts />} />
-              <Route path="/admin/orders" element={<AdminOrders />} />
-              <Route path="/admin/customers" element={<AdminCustomers />} />
-              <Route path="/admin/analytics" element={<AdminAnalytics />} />
-              <Route path="/admin/settings" element={<AdminSettings />} />
+                {/* Admin Routes */}
+                <Route path="/admin" element={<AdminDashboard />} />
+                <Route path="/admin/products" element={<AdminProducts />} />
+                <Route path="/admin/orders" element={<AdminOrders />} />
+                <Route path="/admin/customers" element={<AdminCustomers />} />
+                <Route path="/admin/analytics" element={<AdminAnalytics />} />
+                <Route path="/admin/settings" element={<AdminSettings />} />
 
-              {/* 404 Not Found - must be last */}
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </main>
-          <Footer />
-        </div>
-      </AuthProvider>
-    </Router>
+                {/* 404 Not Found - must be last */}
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </main>
+            <Footer />
+          </div>
+        </AuthProvider>
+      </Router>
   );
 }
 

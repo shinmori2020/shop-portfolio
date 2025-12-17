@@ -51,6 +51,9 @@ export const Header: React.FC = () => {
               <Link to="/about" className="header__nav-link">
                 About
               </Link>
+              <Link to="/contact" className="header__nav-link">
+                お問い合わせ
+              </Link>
             </nav>
 
             <div className="header__actions">
@@ -164,6 +167,15 @@ export const Header: React.FC = () => {
               onClick={closeMobileMenu}
             >
               About
+            </Link>
+          </li>
+          <li className="header__mobile-nav-item">
+            <Link
+              to="/contact"
+              className="header__mobile-nav-link"
+              onClick={closeMobileMenu}
+            >
+              お問い合わせ
             </Link>
           </li>
         </ul>

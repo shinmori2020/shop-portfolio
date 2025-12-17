@@ -91,6 +91,9 @@ export const Footer: React.FC = () => {
               <li>
                 <Link to="/about" className="footer__link">会社概要</Link>
               </li>
+              <li>
+                <Link to="/contact" className="footer__link">お問い合わせ</Link>
+              </li>
             </ul>
           </div>
         </div>
