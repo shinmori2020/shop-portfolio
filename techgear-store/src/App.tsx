@@ -23,6 +23,7 @@ import { Orders } from './pages/Orders';
 import { Account } from './pages/Account';
 import { AdminDashboard } from './pages/admin/AdminDashboard';
 import { AdminProducts } from './pages/admin/AdminProducts';
+import { AdminInventory } from './pages/admin/AdminInventory';
 import { AdminOrders } from './pages/admin/AdminOrders';
 import { AdminCustomers } from './pages/admin/AdminCustomers';
 import { AdminAnalytics } from './pages/admin/AdminAnalytics';
@@ -80,6 +81,7 @@ function App() {
                 {/* Admin Routes */}
                 <Route path="/admin" element={<AdminDashboard />} />
                 <Route path="/admin/products" element={<AdminProducts />} />
+                <Route path="/admin/inventory" element={<AdminInventory />} />
                 <Route path="/admin/orders" element={<AdminOrders />} />
                 <Route path="/admin/customers" element={<AdminCustomers />} />
                 <Route path="/admin/analytics" element={<AdminAnalytics />} />

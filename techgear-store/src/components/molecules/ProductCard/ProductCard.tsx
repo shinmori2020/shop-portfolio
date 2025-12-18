@@ -2,6 +2,7 @@ import React from 'react';
 import { Product } from '../../../types';
 import { Button } from '../../atoms/Button';
 import { useCartStore } from '../../../store/useCartStore';
+import { checkProductStock } from '../../../utils/priceValidation';
 import './ProductCard.css';
 
 export interface ProductCardProps {
@@ -12,8 +13,17 @@ export interface ProductCardProps {
 export const ProductCard: React.FC<ProductCardProps> = ({ product, onProductClick }) => {
   const addItem = useCartStore((state) => state.addItem);
 
-  const handleAddToCart = (e: React.MouseEvent) => {
+  const handleAddToCart = async (e: React.MouseEvent) => {
     e.stopPropagation();
+
+    // 在庫チェック
+    const stockCheck = await checkProductStock(product.id, 1);
+
+    if (!stockCheck.hasStock) {
+      alert(stockCheck.message || '在庫が不足しています');
+      return;
+    }
+
     addItem(product);
   };
 
@@ -78,6 +88,19 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onProductClic
               </span>
             )}
           </div>
+
+          {/* 在庫表示 */}
+          {product.stock !== undefined && product.stock !== null && (
+            <div className="product-card__stock-info">
+              {product.stock === 0 ? (
+                <span className="product-card__stock-out">在庫切れ</span>
+              ) : product.stock <= 5 ? (
+                <span className="product-card__stock-low">残りわずか（{product.stock}個）</span>
+              ) : (
+                <span className="product-card__stock-available">在庫あり</span>
+              )}
+            </div>
+          )}
 
           <Button
             variant="primary"

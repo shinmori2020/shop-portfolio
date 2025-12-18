@@ -163,6 +163,25 @@
   font-family: 'Rajdhani', sans-serif;
 }
 
+/* 在庫表示 */
+.product-card__stock-info {
+  margin-top: var(--spacing-sm);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.product-card__stock-available {
+  color: var(--color-success);
+}
+
+.product-card__stock-low {
+  color: var(--color-warning);
+}
+
+.product-card__stock-out {
+  color: var(--color-danger);
+}
+
 /* ボタンのカスタマイズ */
 .product-card button {
   margin-top: var(--spacing-md);

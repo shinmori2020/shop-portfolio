@@ -1,0 +1,102 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ユーザー認証の確認
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    // ユーザー自身のドキュメントか確認
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    // 商品コレクション
+    match /products/{productId} {
+      // 誰でも商品情報を読める
+      allow read: if true;
+      // 書き込みは管理者のみ（現在は無効化）
+      allow write: if false;
+    }
+
+    // 注文コレクション - セキュリティ強化
+    match /orders/{orderId} {
+      // ユーザーは自分の注文のみ読める
+      allow read: if isOwner(resource.data.userId);
+
+      // 注文作成時の検証
+      allow create: if isAuthenticated()
+        && request.auth.uid == request.resource.data.userId
+        && request.resource.data.userId != null
+        // 注文番号が存在すること
+        && request.resource.data.orderNumber != null
+        // メールアドレスの形式確認
+        && request.resource.data.customerEmail.matches('.*@.*[.].*')
+        // 配送先情報が存在すること
+        && request.resource.data.shippingAddress != null
+        && request.resource.data.shippingAddress.postalCode != null
+        && request.resource.data.shippingAddress.prefecture != null
+        && request.resource.data.shippingAddress.city != null
+        && request.resource.data.shippingAddress.address != null
+        // 支払い情報の検証
+        && request.resource.data.paymentStatus == 'pending'
+        && request.resource.data.orderStatus == 'pending'
+        // 価格の妥当性チェック（負の値を防ぐ）
+        && request.resource.data.subtotal >= 0
+        && request.resource.data.shipping >= 0
+        && request.resource.data.tax >= 0
+        && request.resource.data.total >= 0
+        // アイテムが存在すること
+        && request.resource.data.items.size() > 0;
+
+      // 注文の更新は限定的に許可
+      allow update: if isOwner(resource.data.userId)
+        // 支払いステータスの更新のみ許可
+        && request.resource.data.userId == resource.data.userId
+        && request.resource.data.orderNumber == resource.data.orderNumber
+        && request.resource.data.items == resource.data.items
+        && request.resource.data.subtotal == resource.data.subtotal
+        && request.resource.data.shipping == resource.data.shipping
+        && request.resource.data.tax == resource.data.tax
+        && request.resource.data.total == resource.data.total;
+
+      // 削除は禁止
+      allow delete: if false;
+    }
+
+    // ユーザープロファイル
+    match /users/{userId} {
+      allow read: if isOwner(userId);
+      allow create: if isOwner(userId);
+      allow update: if isOwner(userId);
+      allow delete: if false;
+    }
+
+    // カートアイテム（もし使用する場合）
+    match /carts/{userId} {
+      allow read: if isOwner(userId);
+      allow write: if isOwner(userId);
+    }
+
+    // レビュー
+    match /reviews/{reviewId} {
+      allow read: if true;
+      allow create: if isAuthenticated()
+        && request.auth.uid == request.resource.data.userId;
+      allow update: if isAuthenticated()
+        && request.auth.uid == resource.data.userId;
+      allow delete: if isAuthenticated()
+        && request.auth.uid == resource.data.userId;
+    }
+
+    // お問い合わせ
+    match /inquiries/{inquiryId} {
+      allow read: if isOwner(resource.data.userId);
+      allow create: if isAuthenticated()
+        && request.auth.uid == request.resource.data.userId;
+      allow update: if false;
+      allow delete: if false;
+    }
+  }
+}

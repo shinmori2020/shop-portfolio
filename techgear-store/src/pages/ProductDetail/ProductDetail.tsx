@@ -5,6 +5,7 @@ import { db } from '../../lib/firebase';
 import { Button } from '../../components/atoms/Button';
 import { useCartStore } from '../../store/useCartStore';
 import { Product } from '../../types';
+import { checkProductStock } from '../../utils/priceValidation';
 import './ProductDetail.css';
 
 export const ProductDetail: React.FC = () => {
@@ -86,7 +87,15 @@ export const ProductDetail: React.FC = () => {
   const displayPrice = product.onSale && product.salePrice ? product.salePrice : product.price;
   const hasDiscount = product.onSale && product.salePrice;
 
-  const handleAddToCart = () => {
+  const handleAddToCart = async () => {
+    // 在庫チェック
+    const stockCheck = await checkProductStock(product.id, quantity);
+
+    if (!stockCheck.hasStock) {
+      alert(stockCheck.message || '在庫が不足しています');
+      return;
+    }
+
     addItem(product, quantity);
     // カート追加完了の通知（後でToast実装予定）
     alert(`${product.name} をカートに追加しました`);

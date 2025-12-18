@@ -28,7 +28,10 @@
       "Bash(git push:*)",
       "Bash(del \"C:\\Users\\kiyos_000\\Desktop\\shop-portfolio\\work-logs\\2024-12-13-filter-improvements.md\")",
       "Bash(cat:*)",
-      "Bash(npm uninstall:*)"
+      "Bash(npm uninstall:*)",
+      "Bash(firebase --version)",
+      "Bash(pkill:*)",
+      "Read(//c/Users/kiyos_000/Desktop/**)"
     ],
     "deny": [],
     "ask": []

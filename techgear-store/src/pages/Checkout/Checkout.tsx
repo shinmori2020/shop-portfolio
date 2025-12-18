@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { collection, addDoc, doc, getDoc, updateDoc } from 'firebase/firestore';
+import { collection, addDoc, doc, getDoc, updateDoc, runTransaction } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
 import { Input } from '../../components/atoms/Input';
 import { Button } from '../../components/atoms/Button';
@@ -8,6 +8,11 @@ import { StripeCheckoutForm } from '../../components/organisms/StripeCheckoutFor
 import { useAuth } from '../../contexts/AuthContext';
 import { useCartStore } from '../../store/useCartStore';
 import { Order, OrderItem } from '../../types';
+import {
+  validateCartPrices,
+  validateCartStock,
+  calculateValidatedTotal
+} from '../../utils/priceValidation';
 import './Checkout.css';
 
 export const Checkout: React.FC = () => {
@@ -144,32 +149,38 @@ export const Checkout: React.FC = () => {
     setLoading(true);
 
     try {
-      // 注文アイテムを準備
-      const orderItems: OrderItem[] = await Promise.all(
-        items.map(async (item) => {
-          // 商品の最新情報を取得
-          const productDoc = await getDoc(doc(db, 'products', item.product.id));
-          const productData = productDoc.exists() ? productDoc.data() : item.product;
+      // 1. 在庫チェック
+      console.log('Checking product stock...');
+      const stockValidation = await validateCartStock(items);
+      if (!stockValidation.hasStock) {
+        const errorMessage = stockValidation.errors.join('\n');
+        throw new Error(`在庫が不足しています:\n${errorMessage}`);
+      }
 
-          return {
-            productId: item.product.id,
-            productName: productData.name || item.product.name,
-            productImage: productData.imageUrl || productData.images?.[0] || item.product.imageUrl || '',
-            price: productData.salePrice || productData.price || item.product.price,
-            quantity: item.quantity,
-            subtotal: (productData.salePrice || productData.price || item.product.price) * item.quantity,
-          };
-        })
+      // 2. 価格検証
+      console.log('Validating prices...');
+      const priceValidation = await validateCartPrices(items);
+      if (!priceValidation.isValid) {
+        const errorMessage = priceValidation.errors.join('\n');
+        throw new Error(`価格の検証に失敗しました:\n${errorMessage}`);
+      }
+
+      // 3. サーバー価格で合計を再計算
+      const validatedTotals = calculateValidatedTotal(
+        priceValidation.validatedItems,
+        5000, // 送料無料閾値
+        500,  // 送料
+        0.1   // 税率
       );
 
-      // 注文データを作成
+      // 4. 注文データを作成（検証済み価格を使用）
       const orderData: Omit<Order, 'id'> = {
         orderNumber: generateOrderNumber(),
         userId: currentUser.uid,
         customerEmail: formData.email,
         customerName: formData.fullName,
         customerPhone: formData.phone,
-        items: orderItems,
+        items: priceValidation.validatedItems, // 検証済みアイテムを使用
         shippingAddress: {
           postalCode: formData.postalCode,
           prefecture: formData.prefecture,
@@ -177,37 +188,79 @@ export const Checkout: React.FC = () => {
           address: formData.address,
           building: formData.building,
         },
-        subtotal: totalPrice,
-        shipping: shippingFee,
-        tax: Math.floor(totalPrice * 0.1), // 10%の税金
+        subtotal: validatedTotals.subtotal,     // 検証済み価格を使用
+        shipping: validatedTotals.shipping,     // 検証済み送料を使用
+        tax: validatedTotals.tax,               // 検証済み税金を使用
         discount: 0,
-        total: finalTotal,
+        total: validatedTotals.total,           // 検証済み合計を使用
         paymentMethod: 'card',
-        paymentStatus: 'pending', // 実際の決済処理後に'paid'に更新
+        paymentStatus: 'pending',
         orderStatus: 'pending',
         createdAt: new Date() as any,
         updatedAt: new Date() as any,
       };
 
-      // Firestoreに注文データを保存
-      const orderRef = await addDoc(collection(db, 'orders'), orderData);
+      // 5. トランザクションで注文作成と在庫更新を原子的に実行
+      console.log('Starting transaction for order creation and stock update...');
 
-      // 在庫を減らす処理
-      for (const item of orderItems) {
-        const productRef = doc(db, 'products', item.productId);
-        const productDoc = await getDoc(productRef);
+      let orderId: string;
 
-        if (productDoc.exists()) {
-          const currentStock = productDoc.data().stock || 0;
-          const newStock = Math.max(0, currentStock - item.quantity);
+      await runTransaction(db, async (transaction) => {
+        // トランザクション内で在庫を再チェック
+        const stockChecks: { productRef: any; currentStock: number; item: OrderItem }[] = [];
 
-          await updateDoc(productRef, {
+        for (const item of priceValidation.validatedItems) {
+          const productRef = doc(db, 'products', item.productId);
+          const productDoc = await transaction.get(productRef);
+
+          if (!productDoc.exists()) {
+            throw new Error(`商品が見つかりません: ${item.productName}`);
+          }
+
+          const productData = productDoc.data();
+          const currentStock = productData.stock;
+
+          // 在庫が管理されている商品の場合
+          if (currentStock !== undefined && currentStock !== null) {
+            // 在庫不足チェック
+            if (currentStock < item.quantity) {
+              throw new Error(
+                `在庫が不足しています: ${item.productName} (在庫: ${currentStock}個, 注文: ${item.quantity}個)`
+              );
+            }
+
+            stockChecks.push({ productRef, currentStock, item });
+          }
+        }
+
+        // 注文ドキュメントを作成（トランザクション内）
+        const orderCollectionRef = collection(db, 'orders');
+        const orderDocRef = doc(orderCollectionRef);
+        orderId = orderDocRef.id;
+
+        transaction.set(orderDocRef, orderData);
+
+        // 在庫を更新（トランザクション内）
+        for (const { productRef, currentStock, item } of stockChecks) {
+          const newStock = currentStock - item.quantity;
+
+          const productDoc = await transaction.get(productRef);
+          const currentSold = productDoc.data()?.sold || 0;
+
+          transaction.update(productRef, {
             stock: newStock,
-            sold: (productDoc.data().sold || 0) + item.quantity,
+            sold: currentSold + item.quantity,
             updatedAt: new Date(),
           });
+
+          console.log(`Stock will be updated for ${item.productName}: ${currentStock} -> ${newStock}`);
         }
-      }
+      });
+
+      console.log('Transaction completed successfully');
+
+      // orderIdを保存（後で使用）
+      const orderRef = { id: orderId! };
 
       // Stripeの決済処理をシミュレーション
       // 実際の本番環境では、ここでStripe APIを使用して決済を処理します

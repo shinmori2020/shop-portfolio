@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { collection, query, getDocs, doc, getDoc, where, orderBy, limit } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
+import { StockAlert } from '../../components/organisms/StockAlert';
 import './AdminDashboard.css';
 
 interface DashboardStats {
@@ -206,8 +207,17 @@ export const AdminDashboard: React.FC = () => {
     return null;
   }
 
+  const handleAlertClick = (product: any) => {
+    navigate('/admin/inventory');
+  };
+
   return (
     <div className="admin-dashboard">
+      {/* 在庫アラート表示 */}
+      <StockAlert
+        threshold={5}
+        onAlertClick={handleAlertClick}
+      />
       <div className="admin-dashboard__header">
         <h1>管理者ダッシュボード</h1>
         <div className="admin-dashboard__header-actions">
