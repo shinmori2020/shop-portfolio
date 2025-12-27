@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { collection, getDocs, doc, updateDoc, writeBatch, addDoc } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
-import { Button } from '../../components/atoms/Button';
 import './AdminInventory.css';
 
 interface Product {
@@ -249,71 +248,166 @@ export const AdminInventory: React.FC = () => {
       p.price.toString(),
     ]);
 
-    const csvContent = [
-      headers.join(','),
-      ...rows.map(row => row.map(cell => `"${cell}"`).join(','))
-    ].join('\n');
+    // タブ区切りで作成（Excelが確実に認識する形式）
+    const tsvContent = [
+      headers.join('\t'),
+      ...rows.map(row => row.join('\t'))
+    ].join('\r\n');
 
-    const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
+    // BOM付きUTF-16LEで出力（Excelが最も確実に認識する形式）
+    // UTF-16LE BOM: 0xFF 0xFE
+    const bom = new Uint8Array([0xFF, 0xFE]);
+    const encoder = new TextEncoder();
+
+    // UTF-16LEに変換
+    const textArray = new Uint16Array(tsvContent.length);
+    for (let i = 0; i < tsvContent.length; i++) {
+      textArray[i] = tsvContent.charCodeAt(i);
+    }
+
+    // BOMとコンテンツを結合
+    const combinedArray = new Uint8Array(bom.length + textArray.byteLength);
+    combinedArray.set(bom, 0);
+    combinedArray.set(new Uint8Array(textArray.buffer), bom.length);
+
+    const blob = new Blob([combinedArray], { type: 'text/plain;charset=utf-16le;' });
     const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
-    link.download = `inventory_${new Date().toISOString().split('T')[0]}.csv`;
+    // .txt拡張子でExcelがタブ区切りとして認識
+    link.download = `inventory_${new Date().toISOString().split('T')[0]}.txt`;
     link.click();
+  };
+
+  // CSVをパースする共通関数
+  const parseAndImportCsv = async (text: string) => {
+    if (!db) return;
+
+    // BOMを除去
+    const cleanText = text.replace(/^\uFEFF/, '');
+    const lines = cleanText.split(/\r?\n/);
+
+    // タブ区切りかカンマ区切りかを自動判定
+    const delimiter = lines[0].includes('\t') ? '\t' : ',';
+    console.log('区切り文字:', delimiter === '\t' ? 'タブ' : 'カンマ');
+
+    const headers = lines[0].split(delimiter).map(h => h.replace(/"/g, '').trim());
+
+    console.log('CSVヘッダー:', headers);
+
+    // SKU列のインデックスを取得
+    const skuIndex = headers.findIndex(h => h === 'SKU');
+    const stockIndex = headers.findIndex(h => h === '現在在庫' || h.includes('在庫'));
+
+    if (skuIndex === -1) {
+      alert('CSVファイルにSKU列が必要です。\nヘッダー: ' + headers.join(', '));
+      return;
+    }
+
+    if (stockIndex === -1) {
+      alert('CSVファイルに在庫列（現在在庫）が必要です。\nヘッダー: ' + headers.join(', '));
+      return;
+    }
+
+    const batch = writeBatch(db);
+    let updatedCount = 0;
+
+    for (let i = 1; i < lines.length; i++) {
+      if (!lines[i].trim()) continue;
+
+      const values = lines[i].split(delimiter).map(v => v.replace(/"/g, '').trim());
+      const sku = values[skuIndex];
+      const newStock = parseInt(values[stockIndex], 10);
+
+      if (sku && !isNaN(newStock)) {
+        // SKUで商品を検索
+        const product = products.find(p => p.sku === sku);
+        if (product) {
+          batch.update(doc(db, 'products', product.id), {
+            stock: newStock,
+            updatedAt: new Date(),
+          });
+          updatedCount++;
+        }
+      }
+    }
+
+    await batch.commit();
+    await loadProducts();
+    alert(`${updatedCount}件の商品の在庫を更新しました`);
   };
 
   const importFromCsv = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file || !db) return;
 
-    const reader = new FileReader();
-    reader.onload = async (e) => {
+    // ファイルをArrayBufferとして読み込む
+    const readerBuffer = new FileReader();
+    readerBuffer.onload = async (e) => {
       try {
-        const text = e.target?.result as string;
-        const lines = text.split('\n');
-        const headers = lines[0].split(',').map(h => h.replace(/"/g, '').trim());
+        const buffer = e.target?.result as ArrayBuffer;
+        const bytes = new Uint8Array(buffer);
 
-        // SKU列のインデックスを取得
-        const skuIndex = headers.findIndex(h => h === 'SKU');
-        const stockIndex = headers.findIndex(h => h.includes('在庫'));
+        let text = '';
+        let encoding = 'unknown';
 
-        if (skuIndex === -1 || stockIndex === -1) {
-          alert('CSVファイルにSKUと在庫列が必要です');
-          return;
-        }
-
-        const batch = writeBatch(db);
-        let updatedCount = 0;
-
-        for (let i = 1; i < lines.length; i++) {
-          if (!lines[i].trim()) continue;
-
-          const values = lines[i].split(',').map(v => v.replace(/"/g, '').trim());
-          const sku = values[skuIndex];
-          const newStock = parseInt(values[stockIndex], 10);
-
-          if (sku && !isNaN(newStock)) {
-            // SKUで商品を検索
-            const product = products.find(p => p.sku === sku);
-            if (product) {
-              batch.update(doc(db, 'products', product.id), {
-                stock: newStock,
-                updatedAt: new Date(),
-              });
-              updatedCount++;
-            }
+        // BOMをチェックしてエンコーディングを判定
+        if (bytes[0] === 0xFF && bytes[1] === 0xFE) {
+          // UTF-16LE BOM
+          encoding = 'UTF-16LE';
+          const uint16Array = new Uint16Array(buffer, 2); // BOMをスキップ
+          text = String.fromCharCode(...uint16Array);
+        } else if (bytes[0] === 0xFE && bytes[1] === 0xFF) {
+          // UTF-16BE BOM
+          encoding = 'UTF-16BE';
+          const view = new DataView(buffer, 2);
+          const chars = [];
+          for (let i = 0; i < view.byteLength; i += 2) {
+            chars.push(view.getUint16(i, false));
           }
+          text = String.fromCharCode(...chars);
+        } else if (bytes[0] === 0xEF && bytes[1] === 0xBB && bytes[2] === 0xBF) {
+          // UTF-8 BOM
+          encoding = 'UTF-8';
+          const decoder = new TextDecoder('utf-8');
+          text = decoder.decode(new Uint8Array(buffer, 3)); // BOMをスキップ
+        } else {
+          // BOMなし - UTF-8として試す
+          encoding = 'UTF-8 (no BOM)';
+          const decoder = new TextDecoder('utf-8');
+          text = decoder.decode(buffer);
         }
 
-        await batch.commit();
-        await loadProducts();
-        alert(`${updatedCount}件の商品の在庫を更新しました`);
+        console.log('検出エンコーディング:', encoding);
+
+        // SKUヘッダーをチェック
+        const lines = text.split(/\r?\n/);
+        const delimiter = lines[0].includes('\t') ? '\t' : ',';
+        const headers = lines[0].split(delimiter).map(h => h.replace(/"/g, '').trim());
+
+        if (headers.includes('SKU')) {
+          await parseAndImportCsv(text);
+        } else {
+          // Shift-JISで再読み込み
+          console.log('SKUヘッダーが見つからない、Shift-JISで再試行');
+          const readerShiftJIS = new FileReader();
+          readerShiftJIS.onload = async (e2) => {
+            try {
+              const textShiftJIS = e2.target?.result as string;
+              await parseAndImportCsv(textShiftJIS);
+            } catch (error) {
+              console.error('Error importing CSV (Shift-JIS):', error);
+              alert('CSVのインポートに失敗しました');
+            }
+          };
+          readerShiftJIS.readAsText(file, 'Shift-JIS');
+        }
       } catch (error) {
         console.error('Error importing CSV:', error);
         alert('CSVのインポートに失敗しました');
       }
     };
 
-    reader.readAsText(file, 'UTF-8');
+    readerBuffer.readAsArrayBuffer(file);
     event.target.value = ''; // リセット
   };
 
@@ -365,14 +459,14 @@ export const AdminInventory: React.FC = () => {
       <div className="admin-inventory__header">
         <h1>在庫管理</h1>
         <div className="admin-inventory__actions">
-          <Button onClick={() => navigate('/admin')}>ダッシュボードに戻る</Button>
-          <Button onClick={() => navigate('/admin/products')}>商品管理</Button>
-          <Button onClick={exportToCsv} variant="secondary">CSVエクスポート</Button>
+          <button onClick={() => navigate('/admin')}>ダッシュボードに戻る</button>
+          <button onClick={() => navigate('/admin/products')}>商品管理</button>
+          <button onClick={exportToCsv}>CSVエクスポート</button>
           <label className="admin-inventory__csv-import">
-            CSVインポート
+            インポート
             <input
               type="file"
-              accept=".csv"
+              accept=".csv,.txt,.tsv"
               onChange={importFromCsv}
               style={{ display: 'none' }}
             />
@@ -441,10 +535,10 @@ export const AdminInventory: React.FC = () => {
             onChange={(e) => setBulkStockValue(parseInt(e.target.value, 10) || 0)}
             min="0"
           />
-          <Button onClick={handleBulkStockUpdate}>一括更新</Button>
-          <Button onClick={() => setSelectedProducts(new Set())} variant="secondary">
+          <button onClick={handleBulkStockUpdate}>一括更新</button>
+          <button onClick={() => setSelectedProducts(new Set())}>
             選択解除
-          </Button>
+          </button>
         </div>
       )}
 
@@ -546,13 +640,11 @@ export const AdminInventory: React.FC = () => {
                 <td>¥{product.price.toLocaleString()}</td>
                 <td>¥{(product.stock * product.price).toLocaleString()}</td>
                 <td>
-                  <Button
+                  <button
                     onClick={() => loadStockHistory(product)}
-                    size="small"
-                    variant="secondary"
                   >
                     履歴
-                  </Button>
+                  </button>
                 </td>
               </tr>
             ))}
@@ -603,13 +695,13 @@ export const AdminInventory: React.FC = () => {
               )}
             </div>
             <div className="admin-inventory__modal-actions">
-              <Button onClick={() => {
+              <button onClick={() => {
                 setShowHistoryModal(false);
                 setSelectedProductHistory(null);
                 setStockHistory([]);
               }}>
                 閉じる
-              </Button>
+              </button>
             </div>
           </div>
         </div>

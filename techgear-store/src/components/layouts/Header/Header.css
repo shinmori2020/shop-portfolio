@@ -506,3 +506,33 @@
     padding: var(--spacing-md) 0;
   }
 }
+
+/* 管理者用メニュースタイル */
+.header__user-menu-item--admin {
+  background-color: #f0f9ff;
+  font-weight: 700;
+}
+
+.header__user-menu-item--admin:hover {
+  background-color: #0ea5e9;
+  color: white;
+}
+
+.header__user-menu-divider {
+  height: 1px;
+  background-color: var(--color-border);
+  margin: var(--spacing-sm) 0;
+  border: none;
+}
+
+.header__mobile-nav-link--admin {
+  background-color: #f0f9ff;
+  font-weight: 700;
+}
+
+.header__mobile-divider {
+  border: none;
+  height: 1px;
+  background-color: var(--color-border);
+  margin: var(--spacing-md) 0;
+}

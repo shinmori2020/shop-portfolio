@@ -22,20 +22,40 @@
   align-items: center;
 }
 
-.admin-inventory__csv-import {
-  display: inline-block;
-  padding: 0.5rem 1rem;
-  background: var(--color-secondary);
+.admin-inventory__actions button {
+  background: #0066cc;
   color: white;
-  border-radius: 4px;
-  cursor: pointer;
+  border: none;
+  border-radius: 0;
+  padding: 0.5rem 1rem;
   font-size: 14px;
   font-weight: 500;
-  transition: background 0.2s;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.admin-inventory__actions button:hover {
+  background: #0052a3;
+}
+
+.admin-inventory__csv-import {
+  display: inline-flex;
+  align-items: center;
+  background: #0066cc;
+  color: white;
+  border: none;
+  border-radius: 0;
+  padding: 0.5rem 1rem;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  height: 36px;
+  box-sizing: border-box;
 }
 
 .admin-inventory__csv-import:hover {
-  background: var(--color-secondary-dark);
+  background: #0052a3;
 }
 
 /* サマリーカード */
@@ -47,15 +67,15 @@
 }
 
 .admin-inventory__summary-card {
-  background: white;
-  padding: 1.5rem;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  background: #f0f7ff;
+  padding: 16px;
+  border-radius: 0;
+  border: 1px solid #cce0ff;
 }
 
 .admin-inventory__summary-card h3 {
   font-size: 0.875rem;
-  color: var(--color-text-secondary);
+  color: #666;
   margin-bottom: 0.5rem;
   text-transform: uppercase;
 }
@@ -63,23 +83,7 @@
 .admin-inventory__summary-card p {
   font-size: 2rem;
   font-weight: bold;
-  color: var(--color-text-primary);
-}
-
-.admin-inventory__summary-card--warning {
-  border-left: 4px solid var(--color-danger);
-}
-
-.admin-inventory__summary-card--warning p {
-  color: var(--color-danger);
-}
-
-.admin-inventory__summary-card--caution {
-  border-left: 4px solid var(--color-warning);
-}
-
-.admin-inventory__summary-card--caution p {
-  color: var(--color-warning);
+  color: #0066cc;
 }
 
 /* フィルター */
@@ -92,18 +96,29 @@
 .admin-inventory__search {
   flex: 1;
   padding: 0.5rem 1rem;
-  border: 1px solid var(--color-border);
-  border-radius: 4px;
+  border: 1px solid #cce0ff;
+  border-radius: 0;
   font-size: 14px;
+  background: white;
+}
+
+.admin-inventory__search:focus,
+.admin-inventory__search:focus-visible {
+  outline: none;
 }
 
 .admin-inventory__filter {
   padding: 0.5rem 1rem;
-  border: 1px solid var(--color-border);
-  border-radius: 4px;
+  border: 1px solid #cce0ff;
+  border-radius: 0;
   font-size: 14px;
   background: white;
   cursor: pointer;
+}
+
+.admin-inventory__filter:focus,
+.admin-inventory__filter:focus-visible {
+  outline: none;
 }
 
 /* 一括操作 */
@@ -112,24 +127,47 @@
   align-items: center;
   gap: 1rem;
   padding: 1rem;
-  background: var(--color-background);
-  border-radius: 4px;
+  background: #f0f7ff;
+  border-radius: 0;
   margin-bottom: 1rem;
+  border: 1px solid #cce0ff;
 }
 
 .admin-inventory__bulk input {
   width: 150px;
   padding: 0.5rem;
-  border: 1px solid var(--color-border);
-  border-radius: 4px;
+  border: 1px solid #cce0ff;
+  border-radius: 0;
+  background: white;
+}
+
+.admin-inventory__bulk input:focus,
+.admin-inventory__bulk input:focus-visible {
+  outline: none;
+}
+
+.admin-inventory__bulk button {
+  background: #0066cc;
+  color: white;
+  border: none;
+  border-radius: 0;
+  padding: 0.5rem 1rem;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.admin-inventory__bulk button:hover {
+  background: #0052a3;
 }
 
 /* テーブル */
 .admin-inventory__table-wrapper {
   background: white;
-  border-radius: 8px;
+  border-radius: 0;
   overflow: hidden;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border: 2px solid var(--color-border);
 }
 
 .admin-inventory__table {
@@ -155,6 +193,22 @@
   border-top: 1px solid var(--color-border);
 }
 
+.admin-inventory__table button {
+  background: #0066cc;
+  color: white;
+  border: none;
+  border-radius: 0;
+  padding: 0.375rem 0.75rem;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.admin-inventory__table button:hover {
+  background: #0052a3;
+}
+
 .admin-inventory__row--out {
   background: #fee;
 }
@@ -173,25 +227,32 @@
   width: 40px;
   height: 40px;
   object-fit: cover;
-  border-radius: 4px;
+  border-radius: 0;
+  border: 1px solid #cce0ff;
 }
 
 .admin-inventory__stock-value {
   cursor: pointer;
   padding: 0.25rem 0.5rem;
-  border-radius: 4px;
+  border-radius: 0;
   transition: background 0.2s;
 }
 
 .admin-inventory__stock-value:hover {
-  background: var(--color-background);
+  background: #f0f7ff;
 }
 
 .admin-inventory__stock-input {
   width: 80px;
   padding: 0.25rem 0.5rem;
-  border: 1px solid var(--color-primary);
-  border-radius: 4px;
+  border: 1px solid #cce0ff;
+  border-radius: 0;
+  background: white;
+}
+
+.admin-inventory__stock-input:focus,
+.admin-inventory__stock-input:focus-visible {
+  outline: none;
 }
 
 /* モーダル */
@@ -211,11 +272,12 @@
 .admin-inventory__modal-content {
   background: white;
   padding: 2rem;
-  border-radius: 8px;
+  border-radius: 0;
   max-width: 800px;
   width: 90%;
   max-height: 80vh;
   overflow-y: auto;
+  border: 2px solid var(--color-border);
 }
 
 .admin-inventory__modal-content h2 {
@@ -244,6 +306,22 @@
   display: flex;
   justify-content: flex-end;
   margin-top: 1.5rem;
+}
+
+.admin-inventory__modal-actions button {
+  background: #0066cc;
+  color: white;
+  border: none;
+  border-radius: 0;
+  padding: 0.5rem 1rem;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.admin-inventory__modal-actions button:hover {
+  background: #0052a3;
 }
 
 .admin-inventory__loading {

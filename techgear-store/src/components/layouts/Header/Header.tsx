@@ -13,6 +13,9 @@ export const Header: React.FC = () => {
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
 
+  // 管理者判定
+  const isAdmin = currentUser?.email?.includes('admin') || currentUser?.email === 'test@example.com';
+
   const handleLogout = async () => {
     try {
       await logout();
@@ -104,6 +107,32 @@ export const Header: React.FC = () => {
                   </button>
                   {showUserMenu && (
                     <div className="header__user-menu">
+                      {isAdmin && (
+                        <>
+                          <Link
+                            to="/admin/dashboard"
+                            className="header__user-menu-item header__user-menu-item--admin"
+                            onClick={() => setShowUserMenu(false)}
+                          >
+                            ダッシュボード
+                          </Link>
+                          <Link
+                            to="/admin/products"
+                            className="header__user-menu-item header__user-menu-item--admin"
+                            onClick={() => setShowUserMenu(false)}
+                          >
+                            商品管理
+                          </Link>
+                          <Link
+                            to="/admin/inventory"
+                            className="header__user-menu-item header__user-menu-item--admin"
+                            onClick={() => setShowUserMenu(false)}
+                          >
+                            在庫管理
+                          </Link>
+                          <div className="header__user-menu-divider"></div>
+                        </>
+                      )}
                       <Link
                         to="/account"
                         className="header__user-menu-item"
@@ -183,6 +212,32 @@ export const Header: React.FC = () => {
         <div className="header__mobile-actions">
           {currentUser ? (
             <>
+              {isAdmin && (
+                <>
+                  <Link
+                    to="/admin/dashboard"
+                    className="header__mobile-nav-link header__mobile-nav-link--admin"
+                    onClick={closeMobileMenu}
+                  >
+                    ダッシュボード
+                  </Link>
+                  <Link
+                    to="/admin/products"
+                    className="header__mobile-nav-link header__mobile-nav-link--admin"
+                    onClick={closeMobileMenu}
+                  >
+                    商品管理
+                  </Link>
+                  <Link
+                    to="/admin/inventory"
+                    className="header__mobile-nav-link header__mobile-nav-link--admin"
+                    onClick={closeMobileMenu}
+                  >
+                    在庫管理
+                  </Link>
+                  <hr className="header__mobile-divider" />
+                </>
+              )}
               <Link
                 to="/account"
                 className="header__mobile-nav-link"
