@@ -4,7 +4,6 @@ import { useAuth } from '../../contexts/AuthContext';
 import { collection, getDocs, deleteDoc, doc, updateDoc, addDoc, query, where, writeBatch } from 'firebase/firestore';
 import { db, storage } from '../../lib/firebase';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { Button } from '../../components/atoms/Button';
 import { sampleProducts } from '../../data/products';
 import './AdminProducts.css';
 
@@ -208,14 +207,24 @@ export const AdminProducts: React.FC = () => {
   const togglePublishStatus = async (product: Product) => {
     if (!db) return;
 
+    const newStatus = !product.isPublished;
+
+    // 先にローカルのstateを更新（即座にUIに反映）
+    setProducts(prev => prev.map(p =>
+      p.id === product.id ? { ...p, isPublished: newStatus, updatedAt: new Date() } : p
+    ));
+
     try {
       await updateDoc(doc(db, 'products', product.id), {
-        isPublished: !product.isPublished,
+        isPublished: newStatus,
         updatedAt: new Date(),
       });
-      await loadProducts();
     } catch (error) {
       console.error('Error toggling publish status:', error);
+      // エラー時は元に戻す
+      setProducts(prev => prev.map(p =>
+        p.id === product.id ? { ...p, isPublished: !newStatus } : p
+      ));
     }
   };
 
@@ -396,24 +405,28 @@ export const AdminProducts: React.FC = () => {
       <div className="admin-products__header">
         <h1>商品管理</h1>
         <div className="admin-products__actions">
-          <Button onClick={() => navigate('/admin')}>ダッシュボードに戻る</Button>
-          {products.length === 0 && (
-            <Button
-              onClick={loadSampleProducts}
-              disabled={loadingSampleData}
-              variant="primary"
+          <div className="admin-products__nav">
+            <button onClick={() => navigate('/admin')}>ダッシュボードに戻る</button>
+            <button onClick={() => navigate('/admin/inventory')}>在庫管理</button>
+          </div>
+          <div className="admin-products__divider"></div>
+          <div className="admin-products__page-actions">
+            {products.length === 0 && (
+              <button
+                onClick={loadSampleProducts}
+                disabled={loadingSampleData}
+              >
+                {loadingSampleData ? '登録中...' : 'サンプル商品を登録'}
+              </button>
+            )}
+            <button
+              onClick={initializeAllStock}
+              disabled={initializingStock}
             >
-              {loadingSampleData ? '登録中...' : 'サンプル商品を登録'}
-            </Button>
-          )}
-          <Button
-            onClick={initializeAllStock}
-            disabled={initializingStock}
-            variant="secondary"
-          >
-            {initializingStock ? '初期化中...' : '在庫初期化'}
-          </Button>
-          <Button onClick={() => setShowAddModal(true)}>新商品追加</Button>
+              {initializingStock ? '初期化中...' : '在庫初期化'}
+            </button>
+            <button onClick={() => setShowAddModal(true)}>新商品追加</button>
+          </div>
         </div>
       </div>
 
@@ -435,11 +448,17 @@ export const AdminProducts: React.FC = () => {
             {products.map(product => (
               <tr key={product.id}>
                 <td>
-                  <img
-                    src={product.images?.[0] || '/placeholder.png'}
-                    alt={product.name}
-                    className="admin-products__thumbnail"
-                  />
+                  {product.images?.[0] ? (
+                    <img
+                      src={product.images[0]}
+                      alt={product.name}
+                      className="admin-products__thumbnail"
+                    />
+                  ) : (
+                    <div className="admin-products__no-image">
+                      NO IMAGE
+                    </div>
+                  )}
                 </td>
                 <td>{product.name}</td>
                 <td>{product.category}</td>
@@ -585,8 +604,8 @@ export const AdminProducts: React.FC = () => {
               </div>
 
               <div className="admin-products__modal-actions">
-                <Button
-                  variant="outline"
+                <button
+                  className="admin-products__modal-cancel"
                   onClick={() => {
                     setShowAddModal(false);
                     setEditingProduct(null);
@@ -594,13 +613,13 @@ export const AdminProducts: React.FC = () => {
                   }}
                 >
                   キャンセル
-                </Button>
-                <Button
+                </button>
+                <button
                   onClick={editingProduct ? handleUpdateProduct : handleAddProduct}
                   disabled={uploadingImage}
                 >
                   {uploadingImage ? 'アップロード中...' : editingProduct ? '更新' : '追加'}
-                </Button>
+                </button>
               </div>
             </div>
           </div>

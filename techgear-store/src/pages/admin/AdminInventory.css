@@ -22,7 +22,13 @@
   align-items: center;
 }
 
-.admin-inventory__actions button {
+.admin-inventory__nav {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.admin-inventory__nav button {
   background: #0066cc;
   color: white;
   border: none;
@@ -34,7 +40,35 @@
   transition: all 0.2s ease;
 }
 
-.admin-inventory__actions button:hover {
+.admin-inventory__nav button:hover {
+  background: #0052a3;
+}
+
+.admin-inventory__divider {
+  width: 1px;
+  height: 24px;
+  background: #cce0ff;
+}
+
+.admin-inventory__page-actions {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.admin-inventory__page-actions button {
+  background: #0066cc;
+  color: white;
+  border: none;
+  border-radius: 0;
+  padding: 0.5rem 1rem;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.admin-inventory__page-actions button:hover {
   background: #0052a3;
 }
 

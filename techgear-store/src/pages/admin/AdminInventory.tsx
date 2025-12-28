@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { collection, getDocs, doc, updateDoc, writeBatch, addDoc } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
+import * as XLSX from 'xlsx';
 import './AdminInventory.css';
 
 interface Product {
@@ -45,10 +46,60 @@ export const AdminInventory: React.FC = () => {
   const [showHistoryModal, setShowHistoryModal] = useState(false);
   const [selectedProductHistory, setSelectedProductHistory] = useState<Product | null>(null);
   const [stockHistory, setStockHistory] = useState<StockHistory[]>([]);
-  const [showCsvImport, setShowCsvImport] = useState(false);
 
   // 在庫警告の閾値
   const LOW_STOCK_THRESHOLD = 5;
+
+  // 次のSKU番号を生成する関数
+  const generateNextSku = (existingProducts: Product[]): string => {
+    const skuNumbers = existingProducts
+      .map(p => p.sku)
+      .filter(sku => sku && sku.startsWith('SKU_'))
+      .map(sku => parseInt(sku.replace('SKU_', ''), 10))
+      .filter(num => !isNaN(num));
+
+    const maxNumber = skuNumbers.length > 0 ? Math.max(...skuNumbers) : 0;
+    return `SKU_${String(maxNumber + 1).padStart(3, '0')}`;
+  };
+
+  // SKUが空の商品に自動でSKUを設定する関数
+  const assignMissingSKUs = async () => {
+    if (!db) return;
+
+    const productsWithoutSku = products.filter(p => !p.sku || p.sku === '');
+    if (productsWithoutSku.length === 0) {
+      alert('すべての商品にSKUが設定されています');
+      return;
+    }
+
+    if (!window.confirm(`${productsWithoutSku.length}件の商品にSKUが設定されていません。自動でSKUを割り当てますか？`)) {
+      return;
+    }
+
+    try {
+      const batch = writeBatch(db);
+      let currentProducts = [...products];
+
+      for (const product of productsWithoutSku) {
+        const newSku = generateNextSku(currentProducts);
+        batch.update(doc(db, 'products', product.id), {
+          sku: newSku,
+          updatedAt: new Date(),
+        });
+        // 次のSKU生成のために更新
+        currentProducts = currentProducts.map(p =>
+          p.id === product.id ? { ...p, sku: newSku } : p
+        );
+      }
+
+      await batch.commit();
+      await loadProducts();
+      alert(`${productsWithoutSku.length}件の商品にSKUを割り当てました`);
+    } catch (error) {
+      console.error('Error assigning SKUs:', error);
+      alert('SKUの割り当てに失敗しました');
+    }
+  };
 
   useEffect(() => {
     checkAdminAndLoadProducts();
@@ -88,7 +139,12 @@ export const AdminInventory: React.FC = () => {
         updatedAt: doc.data().updatedAt?.toDate?.() || new Date(),
       } as Product));
 
-      setProducts(productsData.sort((a, b) => a.name.localeCompare(b.name)));
+      // SKU順にソート（SKUがない場合は最後に）
+      setProducts(productsData.sort((a, b) => {
+        const skuA = a.sku || 'ZZZ'; // SKUがない場合は最後に
+        const skuB = b.sku || 'ZZZ';
+        return skuA.localeCompare(skuB);
+      }));
     } catch (error) {
       console.error('Error loading products:', error);
     } finally {
@@ -153,11 +209,12 @@ export const AdminInventory: React.FC = () => {
 
     try {
       const batch = writeBatch(db);
+      const dbRef = db; // TypeScript narrowing用
 
       selectedProducts.forEach(productId => {
         const product = products.find(p => p.id === productId);
         if (product) {
-          batch.update(doc(db, 'products', productId), {
+          batch.update(doc(dbRef, 'products', productId), {
             stock: bulkStockValue,
             updatedAt: new Date(),
           });
@@ -214,19 +271,27 @@ export const AdminInventory: React.FC = () => {
     }
   };
 
+  // 履歴の保持期間（日数）
+  const HISTORY_RETENTION_DAYS = 90;
+
   const loadStockHistory = async (product: Product) => {
     if (!db) return;
 
     try {
       const historyRef = collection(db, 'stockHistory');
       const snapshot = await getDocs(historyRef);
+
+      // 90日前の日付を計算
+      const cutoffDate = new Date();
+      cutoffDate.setDate(cutoffDate.getDate() - HISTORY_RETENTION_DAYS);
+
       const history = snapshot.docs
         .map(doc => ({
           id: doc.id,
           ...doc.data(),
           createdAt: doc.data().createdAt?.toDate?.() || new Date(),
         } as StockHistory))
-        .filter(h => h.productId === product.id)
+        .filter(h => h.productId === product.id && h.createdAt >= cutoffDate)
         .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
 
       setStockHistory(history);
@@ -237,178 +302,174 @@ export const AdminInventory: React.FC = () => {
     }
   };
 
-  const exportToCsv = () => {
-    const headers = ['商品名', 'SKU', 'カテゴリ', '現在在庫', '販売数', '価格'];
-    const rows = filteredProducts.map(p => [
-      p.name,
-      p.sku || '',
-      p.category,
-      p.stock.toString(),
-      (p.sold || 0).toString(),
-      p.price.toString(),
-    ]);
+  const exportToExcel = () => {
+    // SKU順にソートしてエクスポート
+    const sortedProducts = [...filteredProducts].sort((a, b) => {
+      const skuA = a.sku || 'ZZZ';
+      const skuB = b.sku || 'ZZZ';
+      return skuA.localeCompare(skuB);
+    });
 
-    // タブ区切りで作成（Excelが確実に認識する形式）
-    const tsvContent = [
-      headers.join('\t'),
-      ...rows.map(row => row.join('\t'))
-    ].join('\r\n');
+    // Excelに出力するデータを作成
+    const data = sortedProducts.map(p => ({
+      '商品名': p.name,
+      'SKU': p.sku || '',
+      'カテゴリ': p.category,
+      '現在在庫': p.stock,
+      '販売数': p.sold || 0,
+      '価格': p.price,
+    }));
 
-    // BOM付きUTF-16LEで出力（Excelが最も確実に認識する形式）
-    // UTF-16LE BOM: 0xFF 0xFE
-    const bom = new Uint8Array([0xFF, 0xFE]);
-    const encoder = new TextEncoder();
+    // ワークシートを作成
+    const worksheet = XLSX.utils.json_to_sheet(data);
 
-    // UTF-16LEに変換
-    const textArray = new Uint16Array(tsvContent.length);
-    for (let i = 0; i < tsvContent.length; i++) {
-      textArray[i] = tsvContent.charCodeAt(i);
-    }
+    // 列幅を設定
+    worksheet['!cols'] = [
+      { wch: 20 }, // 商品名
+      { wch: 12 }, // SKU
+      { wch: 15 }, // カテゴリ
+      { wch: 10 }, // 現在在庫
+      { wch: 10 }, // 販売数
+      { wch: 12 }, // 価格
+    ];
 
-    // BOMとコンテンツを結合
-    const combinedArray = new Uint8Array(bom.length + textArray.byteLength);
-    combinedArray.set(bom, 0);
-    combinedArray.set(new Uint8Array(textArray.buffer), bom.length);
+    // ワークブックを作成
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, '在庫一覧');
 
-    const blob = new Blob([combinedArray], { type: 'text/plain;charset=utf-16le;' });
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    // .txt拡張子でExcelがタブ区切りとして認識
-    link.download = `inventory_${new Date().toISOString().split('T')[0]}.txt`;
-    link.click();
+    // Excelファイルとしてダウンロード
+    XLSX.writeFile(workbook, `inventory_${new Date().toISOString().split('T')[0]}.xlsx`);
   };
 
-  // CSVをパースする共通関数
-  const parseAndImportCsv = async (text: string) => {
-    if (!db) return;
-
-    // BOMを除去
-    const cleanText = text.replace(/^\uFEFF/, '');
-    const lines = cleanText.split(/\r?\n/);
-
-    // タブ区切りかカンマ区切りかを自動判定
-    const delimiter = lines[0].includes('\t') ? '\t' : ',';
-    console.log('区切り文字:', delimiter === '\t' ? 'タブ' : 'カンマ');
-
-    const headers = lines[0].split(delimiter).map(h => h.replace(/"/g, '').trim());
-
-    console.log('CSVヘッダー:', headers);
-
-    // SKU列のインデックスを取得
-    const skuIndex = headers.findIndex(h => h === 'SKU');
-    const stockIndex = headers.findIndex(h => h === '現在在庫' || h.includes('在庫'));
-
-    if (skuIndex === -1) {
-      alert('CSVファイルにSKU列が必要です。\nヘッダー: ' + headers.join(', '));
-      return;
-    }
-
-    if (stockIndex === -1) {
-      alert('CSVファイルに在庫列（現在在庫）が必要です。\nヘッダー: ' + headers.join(', '));
-      return;
-    }
-
-    const batch = writeBatch(db);
-    let updatedCount = 0;
-
-    for (let i = 1; i < lines.length; i++) {
-      if (!lines[i].trim()) continue;
-
-      const values = lines[i].split(delimiter).map(v => v.replace(/"/g, '').trim());
-      const sku = values[skuIndex];
-      const newStock = parseInt(values[stockIndex], 10);
-
-      if (sku && !isNaN(newStock)) {
-        // SKUで商品を検索
-        const product = products.find(p => p.sku === sku);
-        if (product) {
-          batch.update(doc(db, 'products', product.id), {
-            stock: newStock,
-            updatedAt: new Date(),
-          });
-          updatedCount++;
-        }
-      }
-    }
-
-    await batch.commit();
-    await loadProducts();
-    alert(`${updatedCount}件の商品の在庫を更新しました`);
-  };
-
-  const importFromCsv = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const importFromExcel = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file || !db) return;
 
-    // ファイルをArrayBufferとして読み込む
-    const readerBuffer = new FileReader();
-    readerBuffer.onload = async (e) => {
-      try {
-        const buffer = e.target?.result as ArrayBuffer;
-        const bytes = new Uint8Array(buffer);
+    try {
+      // Excelファイルを読み込み
+      const buffer = await file.arrayBuffer();
+      const workbook = XLSX.read(buffer, { type: 'array' });
 
-        let text = '';
-        let encoding = 'unknown';
+      // 最初のシートを取得
+      const sheetName = workbook.SheetNames[0];
+      const sheet = workbook.Sheets[sheetName];
 
-        // BOMをチェックしてエンコーディングを判定
-        if (bytes[0] === 0xFF && bytes[1] === 0xFE) {
-          // UTF-16LE BOM
-          encoding = 'UTF-16LE';
-          const uint16Array = new Uint16Array(buffer, 2); // BOMをスキップ
-          text = String.fromCharCode(...uint16Array);
-        } else if (bytes[0] === 0xFE && bytes[1] === 0xFF) {
-          // UTF-16BE BOM
-          encoding = 'UTF-16BE';
-          const view = new DataView(buffer, 2);
-          const chars = [];
-          for (let i = 0; i < view.byteLength; i += 2) {
-            chars.push(view.getUint16(i, false));
-          }
-          text = String.fromCharCode(...chars);
-        } else if (bytes[0] === 0xEF && bytes[1] === 0xBB && bytes[2] === 0xBF) {
-          // UTF-8 BOM
-          encoding = 'UTF-8';
-          const decoder = new TextDecoder('utf-8');
-          text = decoder.decode(new Uint8Array(buffer, 3)); // BOMをスキップ
-        } else {
-          // BOMなし - UTF-8として試す
-          encoding = 'UTF-8 (no BOM)';
-          const decoder = new TextDecoder('utf-8');
-          text = decoder.decode(buffer);
-        }
+      // シートをJSONに変換
+      const data = XLSX.utils.sheet_to_json<Record<string, unknown>>(sheet);
 
-        console.log('検出エンコーディング:', encoding);
+      console.log('インポートデータ:', data);
 
-        // SKUヘッダーをチェック
-        const lines = text.split(/\r?\n/);
-        const delimiter = lines[0].includes('\t') ? '\t' : ',';
-        const headers = lines[0].split(delimiter).map(h => h.replace(/"/g, '').trim());
-
-        if (headers.includes('SKU')) {
-          await parseAndImportCsv(text);
-        } else {
-          // Shift-JISで再読み込み
-          console.log('SKUヘッダーが見つからない、Shift-JISで再試行');
-          const readerShiftJIS = new FileReader();
-          readerShiftJIS.onload = async (e2) => {
-            try {
-              const textShiftJIS = e2.target?.result as string;
-              await parseAndImportCsv(textShiftJIS);
-            } catch (error) {
-              console.error('Error importing CSV (Shift-JIS):', error);
-              alert('CSVのインポートに失敗しました');
-            }
-          };
-          readerShiftJIS.readAsText(file, 'Shift-JIS');
-        }
-      } catch (error) {
-        console.error('Error importing CSV:', error);
-        alert('CSVのインポートに失敗しました');
+      if (data.length === 0) {
+        alert('ファイルにデータがありません');
+        return;
       }
-    };
 
-    readerBuffer.readAsArrayBuffer(file);
-    event.target.value = ''; // リセット
+      // SKU列の確認
+      const firstRow = data[0];
+      if (!('SKU' in firstRow)) {
+        alert('ファイルにSKU列が必要です');
+        return;
+      }
+
+      const dbRef = db;
+      const batch = writeBatch(dbRef);
+      let updatedCount = 0;
+      let addedCount = 0;
+      let currentProducts = [...products];
+
+      for (const row of data) {
+        const sku = String(row['SKU'] || '').trim();
+        const productName = String(row['商品名'] || '').trim();
+        const category = String(row['カテゴリ'] || '').trim();
+        const stock = Number(row['現在在庫']);
+        const sold = Number(row['販売数']);
+        const price = Number(row['価格']);
+
+        // SKUのみでマッチング（シンプルで確実）
+        const product = sku ? products.find(p => p.sku === sku) : null;
+
+        console.log(`検索: SKU="${sku}" => ${product ? `マッチ: ${product.name}` : '見つからず'}`);
+
+        if (product) {
+          // 既存商品の更新
+          const updateData: Record<string, unknown> = {
+            updatedAt: new Date(),
+          };
+
+          if (!isNaN(stock)) {
+            updateData.stock = stock;
+          }
+
+          if (!isNaN(price)) {
+            updateData.price = price;
+          }
+
+          if (!isNaN(sold)) {
+            updateData.sold = sold;
+          }
+
+          if (productName) {
+            updateData.name = productName;
+          }
+
+          if (category) {
+            updateData.category = category;
+          }
+
+          batch.update(doc(dbRef, 'products', product.id), updateData);
+          updatedCount++;
+          console.log(`更新: ${product.name}`, updateData);
+        } else {
+          // 新規商品の追加（商品名と価格が必須）
+          if (productName && !isNaN(price)) {
+            // SKUがない場合は自動生成
+            const finalSku = sku || generateNextSku(currentProducts);
+
+            const newProductRef = doc(collection(dbRef, 'products'));
+            const newProductData = {
+              name: productName,
+              sku: finalSku,
+              category: category || 'その他',
+              stock: isNaN(stock) ? 0 : stock,
+              sold: isNaN(sold) ? 0 : sold,
+              price: price,
+              createdAt: new Date(),
+              updatedAt: new Date(),
+            };
+            batch.set(newProductRef, newProductData);
+            addedCount++;
+            console.log(`新規追加: ${productName} (SKU: ${finalSku})`, newProductData);
+
+            // 次のSKU生成のためにリストに追加
+            currentProducts.push({ ...newProductData, id: newProductRef.id } as Product);
+          } else {
+            console.log(`スキップ（情報不足）- 商品名: "${productName}", 価格: ${price}`);
+          }
+        }
+      }
+
+      if (updatedCount > 0 || addedCount > 0) {
+        await batch.commit();
+        await loadProducts();
+      }
+
+      const messages = [];
+      if (updatedCount > 0) {
+        messages.push(`${updatedCount}件の商品を更新しました`);
+      }
+      if (addedCount > 0) {
+        messages.push(`${addedCount}件の商品を新規追加しました`);
+      }
+      if (messages.length === 0) {
+        messages.push('更新する商品がありませんでした');
+      }
+      alert(messages.join('\n'));
+    } catch (error) {
+      console.error('Error importing Excel:', error);
+      alert('ファイルのインポートに失敗しました');
+    }
+
+    event.target.value = '';
   };
 
   // フィルタリング処理
@@ -459,18 +520,29 @@ export const AdminInventory: React.FC = () => {
       <div className="admin-inventory__header">
         <h1>在庫管理</h1>
         <div className="admin-inventory__actions">
-          <button onClick={() => navigate('/admin')}>ダッシュボードに戻る</button>
-          <button onClick={() => navigate('/admin/products')}>商品管理</button>
-          <button onClick={exportToCsv}>CSVエクスポート</button>
-          <label className="admin-inventory__csv-import">
-            インポート
-            <input
-              type="file"
-              accept=".csv,.txt,.tsv"
-              onChange={importFromCsv}
-              style={{ display: 'none' }}
-            />
-          </label>
+          <div className="admin-inventory__nav">
+            <button onClick={() => navigate('/admin')}>ダッシュボードに戻る</button>
+            <button onClick={() => navigate('/admin/products')}>商品管理</button>
+          </div>
+          <div className="admin-inventory__divider"></div>
+          <div className="admin-inventory__page-actions">
+            <button onClick={exportToExcel}>Excelエクスポート</button>
+            <label className="admin-inventory__csv-import">
+              Excelインポート
+              <input
+                type="file"
+                accept=".xlsx,.xls"
+                onChange={importFromExcel}
+                style={{ display: 'none' }}
+              />
+            </label>
+            <button
+              onClick={assignMissingSKUs}
+              title="SKUが設定されていない商品に自動でSKUを割り当てます"
+            >
+              SKU自動割り当て
+            </button>
+          </div>
         </div>
       </div>
 

@@ -1,45 +1,96 @@
 .admin-products {
-  min-height: 100vh;
-  background-color: #f8f9fa;
-  padding: 20px;
+  padding: 2rem;
+  max-width: 1400px;
+  margin: 0 auto;
 }
 
 .admin-products__loading {
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: 100vh;
-  font-size: 1.2rem;
-  color: #666;
+  min-height: 400px;
+  font-size: 1.25rem;
+  color: var(--color-text-secondary);
 }
 
 .admin-products__header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 30px;
-  padding: 20px;
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  margin-bottom: 2rem;
 }
 
 .admin-products__header h1 {
-  margin: 0;
   font-size: 2rem;
-  color: #333;
+  color: var(--color-text-primary);
 }
 
 .admin-products__actions {
   display: flex;
-  gap: 12px;
+  gap: 1rem;
+  align-items: center;
+}
+
+.admin-products__nav {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.admin-products__nav button {
+  background: #0066cc;
+  color: white;
+  border: none;
+  border-radius: 0;
+  padding: 0.5rem 1rem;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.admin-products__nav button:hover {
+  background: #0052a3;
+}
+
+.admin-products__divider {
+  width: 1px;
+  height: 24px;
+  background: #cce0ff;
+}
+
+.admin-products__page-actions {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.admin-products__page-actions button {
+  background: #0066cc;
+  color: white;
+  border: none;
+  border-radius: 0;
+  padding: 0.5rem 1rem;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.admin-products__page-actions button:hover {
+  background: #0052a3;
+}
+
+.admin-products__page-actions button:disabled {
+  background: #ccc;
+  cursor: not-allowed;
 }
 
 .admin-products__list {
   background: white;
-  border-radius: 12px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  border-radius: 0;
   overflow: hidden;
+  border: 2px solid var(--color-border);
 }
 
 .admin-products__table {
@@ -48,85 +99,116 @@
 }
 
 .admin-products__table th {
+  padding: 1rem;
   text-align: left;
-  padding: 16px;
-  background: #f8f9fa;
   font-weight: 600;
-  color: #666;
-  font-size: 0.9rem;
-  border-bottom: 2px solid #e0e0e0;
+  color: var(--color-text-secondary);
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  background: var(--color-background);
+  border-bottom: 2px solid var(--color-border);
 }
 
 .admin-products__table td {
-  padding: 16px;
-  border-bottom: 1px solid #f0f0f0;
+  padding: 1rem;
+  border-top: 1px solid var(--color-border);
 }
 
 .admin-products__thumbnail {
-  width: 60px;
-  height: 60px;
+  width: 40px;
+  height: 40px;
   object-fit: cover;
-  border-radius: 8px;
-  border: 1px solid #e0e0e0;
+  border-radius: 0;
+  border: 1px solid #cce0ff;
+}
+
+.admin-products__no-image {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #e6f0fa;
+  border: 1px solid #cce0ff;
+  color: #0066cc;
+  font-size: 8px;
+  font-weight: 600;
+  text-align: center;
 }
 
 .admin-products__status {
-  padding: 6px 12px;
-  border-radius: 20px;
-  font-size: 0.85rem;
+  padding: 0.375rem 0.75rem;
+  border-radius: 0;
+  font-size: 13px;
   font-weight: 500;
   border: none;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
 }
 
 .admin-products__status--published {
-  background: #d4edda;
-  color: #155724;
+  background: #0066cc;
+  color: white;
+}
+
+.admin-products__status--published:hover {
+  background: #0052a3;
 }
 
 .admin-products__status--draft {
-  background: #fff3cd;
-  color: #856404;
+  background: #e6f0fa;
+  color: #0066cc;
+  border: 1px solid #99c2e8;
+}
+
+.admin-products__status--draft:hover {
+  background: #cce0f5;
 }
 
 .admin-products__actions-cell {
   display: flex;
-  gap: 8px;
+  gap: 0.5rem;
 }
 
 .admin-products__action {
-  padding: 6px 12px;
+  background: #0066cc;
+  color: white;
   border: none;
-  border-radius: 4px;
-  font-size: 0.85rem;
+  border-radius: 0;
+  padding: 0.375rem 0.75rem;
+  font-size: 13px;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
+}
+
+.admin-products__action:hover {
+  background: #0052a3;
 }
 
 .admin-products__action--edit {
-  background: #e3f2fd;
-  color: #1976d2;
+  background: #0066cc;
+  color: white;
 }
 
 .admin-products__action--edit:hover {
-  background: #bbdefb;
+  background: #0052a3;
 }
 
 .admin-products__action--delete {
-  background: #ffebee;
-  color: #c62828;
+  background: #e6f0fa;
+  color: #0066cc;
+  border: 1px solid #99c2e8;
 }
 
 .admin-products__action--delete:hover {
-  background: #ffcdd2;
+  background: #cce0f5;
 }
 
 .admin-products__empty {
   padding: 60px;
   text-align: center;
-  color: #999;
+  color: var(--color-text-secondary);
   font-size: 1.1rem;
 }
 
@@ -147,90 +229,146 @@
 
 .admin-products__modal-content {
   background: white;
-  border-radius: 12px;
-  padding: 30px;
+  border-radius: 0;
+  padding: 2rem;
   max-width: 600px;
   width: 100%;
   max-height: 90vh;
   overflow-y: auto;
+  border: 2px solid var(--color-border);
 }
 
 .admin-products__modal-content h2 {
-  margin: 0 0 24px 0;
+  margin: 0 0 1.5rem 0;
   font-size: 1.5rem;
-  color: #333;
+  color: var(--color-text-primary);
 }
 
 .admin-products__form {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 1.25rem;
 }
 
 .admin-products__form-group {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 0.5rem;
 }
 
 .admin-products__form-group label {
   font-weight: 500;
-  color: #333;
+  color: var(--color-text-primary);
   font-size: 0.95rem;
 }
 
 .admin-products__form-group input,
 .admin-products__form-group textarea,
 .admin-products__form-group select {
-  padding: 10px 12px;
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  font-size: 1rem;
-  transition: border-color 0.3s ease;
+  padding: 0.5rem 1rem;
+  border: 1px solid #cce0ff;
+  border-radius: 0;
+  font-size: 14px;
+  background: white;
+  transition: border-color 0.2s ease;
 }
 
 .admin-products__form-group input:focus,
 .admin-products__form-group textarea:focus,
 .admin-products__form-group select:focus {
   outline: none;
-  border-color: #5e3dec;
+  border-color: #0066cc;
 }
 
 .admin-products__form-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 20px;
+  gap: 1.25rem;
+}
+
+/* Checkbox styles */
+.admin-products__form-group input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  accent-color: #0066cc;
+  cursor: pointer;
+  margin-right: 0.5rem;
+}
+
+.admin-products__form-group label:has(input[type="checkbox"]) {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  font-size: 1rem;
 }
 
 .admin-products__modal-actions {
   display: flex;
-  gap: 12px;
+  gap: 1rem;
   justify-content: flex-end;
-  margin-top: 24px;
+  margin-top: 1.5rem;
+}
+
+.admin-products__modal-actions button,
+.admin-products__modal-actions > * {
+  background: #0066cc;
+  color: white;
+  border: none;
+  border-radius: 0;
+  padding: 0.5rem 1rem;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.admin-products__modal-actions button:hover,
+.admin-products__modal-actions > *:hover {
+  background: #0052a3;
+}
+
+/* Cancel button style */
+.admin-products__modal-cancel {
+  background: white !important;
+  color: #0066cc !important;
+  border: 1px solid #0066cc !important;
+}
+
+.admin-products__modal-cancel:hover {
+  background: #f0f7ff !important;
 }
 
 @media (max-width: 768px) {
   .admin-products {
-    padding: 12px;
+    padding: 1rem;
   }
 
   .admin-products__header {
     flex-direction: column;
-    gap: 16px;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .admin-products__actions {
+    flex-wrap: wrap;
+  }
+
+  .admin-products__list {
+    overflow-x: auto;
   }
 
   .admin-products__table {
-    font-size: 0.85rem;
+    min-width: 800px;
   }
 
   .admin-products__table th,
   .admin-products__table td {
-    padding: 12px 8px;
+    padding: 0.75rem;
   }
 
   .admin-products__thumbnail {
-    width: 40px;
-    height: 40px;
+    width: 32px;
+    height: 32px;
   }
 
   .admin-products__form-row {

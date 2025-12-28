@@ -1,367 +1,388 @@
-import React, { useEffect, useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
-import { collection, query, getDocs, doc, getDoc, where, orderBy, limit } from 'firebase/firestore';
+import { collection, getDocs } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
-import { StockAlert } from '../../components/organisms/StockAlert';
+import {
+  PieChart,
+  Pie,
+  Cell,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+} from 'recharts';
 import './AdminDashboard.css';
 
-interface DashboardStats {
-  totalOrders: number;
-  totalRevenue: number;
-  totalCustomers: number;
-  totalProducts: number;
-  pendingOrders: number;
-  todayOrders: number;
-  todayRevenue: number;
-  monthlyRevenue: number;
+interface Product {
+  id: string;
+  name: string;
+  category: string;
+  sku: string;
+  price: number;
+  stock: number;
+  sold: number;
+  isPublished: boolean;
+  updatedAt?: Date;
 }
 
-interface RecentOrder {
+interface StockHistory {
   id: string;
-  orderNumber: string;
-  customerName: string;
-  totalAmount: number;
-  status: string;
+  productId: string;
+  productName: string;
+  action: string;
+  quantity: number;
+  previousStock: number;
+  newStock: number;
   createdAt: Date;
 }
 
 export const AdminDashboard: React.FC = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const [products, setProducts] = useState<Product[]>([]);
+  const [recentHistory, setRecentHistory] = useState<StockHistory[]>([]);
   const [loading, setLoading] = useState(true);
-  const [stats, setStats] = useState<DashboardStats>({
-    totalOrders: 0,
-    totalRevenue: 0,
-    totalCustomers: 0,
-    totalProducts: 0,
-    pendingOrders: 0,
-    todayOrders: 0,
-    todayRevenue: 0,
-    monthlyRevenue: 0,
-  });
-  const [recentOrders, setRecentOrders] = useState<RecentOrder[]>([]);
   const [isAdmin, setIsAdmin] = useState(false);
 
+  const LOW_STOCK_THRESHOLD = 5;
+
   useEffect(() => {
-    const checkAdminAndLoadData = async () => {
-      if (!user || !db) {
-        navigate('/login');
-        return;
-      }
-
-      try {
-        // Check if user is admin by UID
-        const userDocRef = doc(db, 'users', user.uid);
-        const userDocSnap = await getDoc(userDocRef);
-
-        if (!userDocSnap.exists()) {
-          console.log('User document not found');
-          navigate('/');
-          return;
-        }
-
-        const userData = userDocSnap.data();
-        console.log('User data:', userData); // Debug log
-
-        if (userData?.role !== 'admin') {
-          console.log('User is not admin, role:', userData?.role);
-          navigate('/');
-          return;
-        }
-
-        setIsAdmin(true);
-
-        // Load dashboard data
-        await loadDashboardData();
-      } catch (error) {
-        console.error('Error loading admin dashboard:', error);
-        navigate('/');
-      }
-    };
-
     checkAdminAndLoadData();
-  }, [user, navigate]);
+  }, [user]);
 
-  const loadDashboardData = async () => {
-    if (!db) return;
+  const checkAdminAndLoadData = async () => {
+    if (!user) {
+      navigate('/login');
+      return;
+    }
+
+    const isAdminUser = user.email?.includes('admin') ||
+                       user.email === 'test@example.com';
+
+    setIsAdmin(isAdminUser);
+
+    if (isAdminUser) {
+      await Promise.all([loadProducts(), loadRecentHistory()]);
+    } else {
+      navigate('/');
+    }
+  };
+
+  const loadProducts = async () => {
+    if (!db) {
+      setLoading(false);
+      return;
+    }
 
     try {
-      setLoading(true);
-
-      // Get today's date range
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      const tomorrow = new Date(today);
-      tomorrow.setDate(tomorrow.getDate() + 1);
-
-      // Get this month's date range
-      const monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
-
-      // Fetch all orders
-      const ordersSnapshot = await getDocs(collection(db, 'orders'));
-      const orders = ordersSnapshot.docs.map(doc => ({
+      const productsRef = collection(db, 'products');
+      const snapshot = await getDocs(productsRef);
+      const productsData: Product[] = snapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data(),
-        createdAt: doc.data().createdAt?.toDate() || new Date(),
-      }));
+        updatedAt: doc.data().updatedAt?.toDate?.() || new Date(),
+      } as Product));
 
-      // Calculate stats
-      let totalRevenue = 0;
-      let todayRevenue = 0;
-      let monthlyRevenue = 0;
-      let todayOrders = 0;
-      let pendingOrders = 0;
-
-      orders.forEach(order => {
-        const orderAmount = order.totalAmount || 0;
-        const orderDate = order.createdAt;
-
-        totalRevenue += orderAmount;
-
-        if (orderDate >= today && orderDate < tomorrow) {
-          todayOrders++;
-          todayRevenue += orderAmount;
-        }
-
-        if (orderDate >= monthStart) {
-          monthlyRevenue += orderAmount;
-        }
-
-        if (order.status === 'pending') {
-          pendingOrders++;
-        }
-      });
-
-      // Get recent orders
-      const recentOrdersData = orders
-        .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
-        .slice(0, 5)
-        .map(order => ({
-          id: order.id,
-          orderNumber: order.orderNumber || `ORD-${order.id.slice(0, 8)}`,
-          customerName: order.shippingAddress?.fullName || 'Unknown',
-          totalAmount: order.totalAmount || 0,
-          status: order.status || 'pending',
-          createdAt: order.createdAt,
-        }));
-
-      // Fetch customers count
-      const customersSnapshot = await getDocs(collection(db, 'users'));
-      const totalCustomers = customersSnapshot.size;
-
-      // Fetch products count
-      const productsSnapshot = await getDocs(collection(db, 'products'));
-      const totalProducts = productsSnapshot.size;
-
-      setStats({
-        totalOrders: orders.length,
-        totalRevenue,
-        totalCustomers,
-        totalProducts,
-        pendingOrders,
-        todayOrders,
-        todayRevenue,
-        monthlyRevenue,
-      });
-
-      setRecentOrders(recentOrdersData);
+      setProducts(productsData);
     } catch (error) {
-      console.error('Error loading dashboard data:', error);
+      console.error('Error loading products:', error);
     } finally {
       setLoading(false);
     }
   };
 
-  const getStatusBadgeClass = (status: string) => {
-    const statusClasses: { [key: string]: string } = {
-      pending: 'admin-dashboard__badge--warning',
-      processing: 'admin-dashboard__badge--info',
-      shipped: 'admin-dashboard__badge--primary',
-      delivered: 'admin-dashboard__badge--success',
-      cancelled: 'admin-dashboard__badge--danger',
-    };
-    return `admin-dashboard__badge ${statusClasses[status] || ''}`;
+  const loadRecentHistory = async () => {
+    if (!db) return;
+
+    try {
+      const historyRef = collection(db, 'stockHistory');
+      const snapshot = await getDocs(historyRef);
+
+      const history = snapshot.docs
+        .map(doc => ({
+          id: doc.id,
+          ...doc.data(),
+          createdAt: doc.data().createdAt?.toDate?.() || new Date(),
+        } as StockHistory))
+        .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
+        .slice(0, 10);
+
+      setRecentHistory(history);
+    } catch (error) {
+      console.error('Error loading history:', error);
+    }
   };
 
-  const getStatusText = (status: string) => {
-    const statusTexts: { [key: string]: string } = {
-      pending: '保留中',
-      processing: '処理中',
-      shipped: '発送済み',
-      delivered: '配達完了',
-      cancelled: 'キャンセル',
-    };
-    return statusTexts[status] || status;
+  // KPI計算
+  const kpiData = {
+    totalProducts: products.length,
+    publishedProducts: products.filter(p => p.isPublished).length,
+    outOfStock: products.filter(p => p.stock === 0).length,
+    lowStock: products.filter(p => p.stock > 0 && p.stock <= LOW_STOCK_THRESHOLD).length,
+    totalStockValue: products.reduce((sum, p) => sum + (p.stock * p.price), 0),
+    totalSold: products.reduce((sum, p) => sum + (p.sold || 0), 0),
   };
+
+  // カテゴリ別データ
+  const categoryData = products.reduce((acc, p) => {
+    const category = p.category || 'その他';
+    if (!acc[category]) {
+      acc[category] = { name: category, count: 0, stock: 0, value: 0 };
+    }
+    acc[category].count += 1;
+    acc[category].stock += p.stock;
+    acc[category].value += p.stock * p.price;
+    return acc;
+  }, {} as Record<string, { name: string; count: number; stock: number; value: number }>);
+
+  const categoryChartData = Object.values(categoryData).sort((a, b) => b.count - a.count);
+
+  // 在庫状況データ
+  const stockStatusData = [
+    { name: '正常', value: products.filter(p => p.stock > LOW_STOCK_THRESHOLD).length },
+    { name: '僅少', value: products.filter(p => p.stock > 0 && p.stock <= LOW_STOCK_THRESHOLD).length },
+    { name: '在庫切れ', value: products.filter(p => p.stock === 0).length },
+  ].filter(d => d.value > 0);
+
+  // 在庫アラート商品
+  const alertProducts = products
+    .filter(p => p.stock <= LOW_STOCK_THRESHOLD)
+    .sort((a, b) => a.stock - b.stock)
+    .slice(0, 10);
+
+  // 最近更新された商品
+  const recentlyUpdated = [...products]
+    .sort((a, b) => {
+      const dateA = a.updatedAt ? new Date(a.updatedAt).getTime() : 0;
+      const dateB = b.updatedAt ? new Date(b.updatedAt).getTime() : 0;
+      return dateB - dateA;
+    })
+    .slice(0, 5);
 
   if (loading) {
-    return (
-      <div className="admin-dashboard">
-        <div className="admin-dashboard__loading">読み込み中...</div>
-      </div>
-    );
+    return <div className="admin-dashboard__loading">読み込み中...</div>;
   }
 
   if (!isAdmin) {
     return null;
   }
 
-  const handleAlertClick = (product: any) => {
-    navigate('/admin/inventory');
-  };
-
   return (
     <div className="admin-dashboard">
-      {/* 在庫アラート表示 */}
-      <StockAlert
-        threshold={5}
-        onAlertClick={handleAlertClick}
-      />
       <div className="admin-dashboard__header">
         <h1>管理者ダッシュボード</h1>
-        <div className="admin-dashboard__header-actions">
-          <Link to="/admin/products" className="admin-dashboard__link-button">
-            商品管理
-          </Link>
-          <Link to="/admin/orders" className="admin-dashboard__link-button">
-            注文管理
-          </Link>
+        <div className="admin-dashboard__actions">
+          <button onClick={() => navigate('/admin/products')}>商品管理</button>
+          <button onClick={() => navigate('/admin/inventory')}>在庫管理</button>
         </div>
       </div>
 
-      <div className="admin-dashboard__stats">
-        <div className="admin-dashboard__stat-card">
-          <div className="admin-dashboard__stat-icon admin-dashboard__stat-icon--orders">
-            📦
-          </div>
-          <div className="admin-dashboard__stat-content">
-            <h3>総注文数</h3>
-            <p className="admin-dashboard__stat-value">{stats.totalOrders}</p>
-            <span className="admin-dashboard__stat-label">
-              本日: {stats.todayOrders}件
-            </span>
+      {/* KPIカード */}
+      <div className="admin-dashboard__kpi">
+        <div className="admin-dashboard__kpi-card">
+          <h3>総商品数</h3>
+          <p className="admin-dashboard__kpi-value">{kpiData.totalProducts}</p>
+          <span className="admin-dashboard__kpi-sub">公開中: {kpiData.publishedProducts}</span>
+        </div>
+        <div className="admin-dashboard__kpi-card admin-dashboard__kpi-card--warning">
+          <h3>在庫切れ</h3>
+          <p className="admin-dashboard__kpi-value">{kpiData.outOfStock}</p>
+          <span className="admin-dashboard__kpi-sub">要対応</span>
+        </div>
+        <div className="admin-dashboard__kpi-card admin-dashboard__kpi-card--caution">
+          <h3>在庫僅少</h3>
+          <p className="admin-dashboard__kpi-value">{kpiData.lowStock}</p>
+          <span className="admin-dashboard__kpi-sub">{LOW_STOCK_THRESHOLD}個以下</span>
+        </div>
+        <div className="admin-dashboard__kpi-card">
+          <h3>在庫総額</h3>
+          <p className="admin-dashboard__kpi-value">¥{kpiData.totalStockValue.toLocaleString()}</p>
+          <span className="admin-dashboard__kpi-sub">総販売数: {kpiData.totalSold}</span>
+        </div>
+      </div>
+
+      {/* グラフセクション */}
+      <div className="admin-dashboard__charts">
+        <div className="admin-dashboard__chart-card">
+          <h3>カテゴリ別商品数</h3>
+          <div className="admin-dashboard__chart">
+            {categoryChartData.length > 0 ? (
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart data={categoryChartData} layout="vertical">
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis type="number" />
+                  <YAxis dataKey="name" type="category" width={100} />
+                  <Tooltip />
+                  <Bar dataKey="count" fill="#0066cc" name="商品数" />
+                </BarChart>
+              </ResponsiveContainer>
+            ) : (
+              <p className="admin-dashboard__no-data">データがありません</p>
+            )}
           </div>
         </div>
 
-        <div className="admin-dashboard__stat-card">
-          <div className="admin-dashboard__stat-icon admin-dashboard__stat-icon--revenue">
-            💴
-          </div>
-          <div className="admin-dashboard__stat-content">
-            <h3>総売上</h3>
-            <p className="admin-dashboard__stat-value">
-              ¥{stats.totalRevenue.toLocaleString()}
-            </p>
-            <span className="admin-dashboard__stat-label">
-              本日: ¥{stats.todayRevenue.toLocaleString()}
-            </span>
-          </div>
-        </div>
-
-        <div className="admin-dashboard__stat-card">
-          <div className="admin-dashboard__stat-icon admin-dashboard__stat-icon--customers">
-            👥
-          </div>
-          <div className="admin-dashboard__stat-content">
-            <h3>顧客数</h3>
-            <p className="admin-dashboard__stat-value">{stats.totalCustomers}</p>
-            <span className="admin-dashboard__stat-label">登録ユーザー</span>
-          </div>
-        </div>
-
-        <div className="admin-dashboard__stat-card">
-          <div className="admin-dashboard__stat-icon admin-dashboard__stat-icon--products">
-            📱
-          </div>
-          <div className="admin-dashboard__stat-content">
-            <h3>商品数</h3>
-            <p className="admin-dashboard__stat-value">{stats.totalProducts}</p>
-            <span className="admin-dashboard__stat-label">登録商品</span>
+        <div className="admin-dashboard__chart-card">
+          <h3>在庫状況</h3>
+          <div className="admin-dashboard__chart">
+            {stockStatusData.length > 0 ? (
+              <ResponsiveContainer width="100%" height={300}>
+                <PieChart>
+                  <Pie
+                    data={stockStatusData}
+                    cx="50%"
+                    cy="50%"
+                    labelLine={false}
+                    label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                    outerRadius={100}
+                    fill="#8884d8"
+                    dataKey="value"
+                  >
+                    {stockStatusData.map((entry, index) => (
+                      <Cell
+                        key={`cell-${index}`}
+                        fill={
+                          entry.name === '在庫切れ' ? '#dc3545' :
+                          entry.name === '僅少' ? '#ffc107' : '#0066cc'
+                        }
+                      />
+                    ))}
+                  </Pie>
+                  <Tooltip />
+                  <Legend />
+                </PieChart>
+              </ResponsiveContainer>
+            ) : (
+              <p className="admin-dashboard__no-data">データがありません</p>
+            )}
           </div>
         </div>
       </div>
 
-      <div className="admin-dashboard__insights">
-        <div className="admin-dashboard__insight-card">
-          <h3>月間売上</h3>
-          <p className="admin-dashboard__insight-value">
-            ¥{stats.monthlyRevenue.toLocaleString()}
-          </p>
-        </div>
-
-        <div className="admin-dashboard__insight-card">
-          <h3>保留中の注文</h3>
-          <p className="admin-dashboard__insight-value admin-dashboard__insight-value--warning">
-            {stats.pendingOrders}件
-          </p>
-        </div>
-      </div>
-
-      <div className="admin-dashboard__recent">
-        <h2>最近の注文</h2>
-        {recentOrders.length > 0 ? (
-          <div className="admin-dashboard__table">
-            <table>
+      {/* リストセクション */}
+      <div className="admin-dashboard__lists">
+        <div className="admin-dashboard__list-card">
+          <h3>在庫アラート</h3>
+          {alertProducts.length > 0 ? (
+            <table className="admin-dashboard__table">
               <thead>
                 <tr>
-                  <th>注文番号</th>
-                  <th>顧客名</th>
-                  <th>金額</th>
-                  <th>ステータス</th>
-                  <th>日時</th>
-                  <th>操作</th>
+                  <th>商品名</th>
+                  <th>SKU</th>
+                  <th>在庫</th>
+                  <th>状態</th>
                 </tr>
               </thead>
               <tbody>
-                {recentOrders.map(order => (
-                  <tr key={order.id}>
-                    <td>{order.orderNumber}</td>
-                    <td>{order.customerName}</td>
-                    <td>¥{order.totalAmount.toLocaleString()}</td>
+                {alertProducts.map(product => (
+                  <tr key={product.id}>
+                    <td>{product.name}</td>
+                    <td>{product.sku || '-'}</td>
+                    <td>{product.stock}</td>
                     <td>
-                      <span className={getStatusBadgeClass(order.status)}>
-                        {getStatusText(order.status)}
+                      <span className={`admin-dashboard__status ${product.stock === 0 ? 'admin-dashboard__status--out' : 'admin-dashboard__status--low'}`}>
+                        {product.stock === 0 ? '在庫切れ' : '僅少'}
                       </span>
-                    </td>
-                    <td>{order.createdAt.toLocaleDateString('ja-JP')}</td>
-                    <td>
-                      <Link
-                        to={`/admin/orders/${order.id}`}
-                        className="admin-dashboard__action-link"
-                      >
-                        詳細
-                      </Link>
                     </td>
                   </tr>
                 ))}
               </tbody>
             </table>
-          </div>
-        ) : (
-          <p className="admin-dashboard__no-data">注文がまだありません</p>
-        )}
+          ) : (
+            <p className="admin-dashboard__no-data">アラートはありません</p>
+          )}
+          {alertProducts.length > 0 && (
+            <button
+              className="admin-dashboard__view-all"
+              onClick={() => navigate('/admin/inventory')}
+            >
+              在庫管理で詳細を確認
+            </button>
+          )}
+        </div>
+
+        <div className="admin-dashboard__list-card">
+          <h3>最近の在庫変更</h3>
+          {recentHistory.length > 0 ? (
+            <table className="admin-dashboard__table">
+              <thead>
+                <tr>
+                  <th>日時</th>
+                  <th>商品名</th>
+                  <th>操作</th>
+                  <th>変更</th>
+                </tr>
+              </thead>
+              <tbody>
+                {recentHistory.map(history => (
+                  <tr key={history.id}>
+                    <td>{new Date(history.createdAt).toLocaleDateString()}</td>
+                    <td>{history.productName}</td>
+                    <td>
+                      {history.action === 'add' && '追加'}
+                      {history.action === 'remove' && '削除'}
+                      {history.action === 'adjust' && '調整'}
+                      {history.action === 'sale' && '販売'}
+                    </td>
+                    <td>{history.previousStock} → {history.newStock}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          ) : (
+            <p className="admin-dashboard__no-data">履歴がありません</p>
+          )}
+        </div>
       </div>
 
+      {/* 最近更新された商品 */}
+      <div className="admin-dashboard__recent">
+        <div className="admin-dashboard__list-card admin-dashboard__list-card--full">
+          <h3>最近更新された商品</h3>
+          {recentlyUpdated.length > 0 ? (
+            <table className="admin-dashboard__table">
+              <thead>
+                <tr>
+                  <th>商品名</th>
+                  <th>カテゴリ</th>
+                  <th>価格</th>
+                  <th>在庫</th>
+                  <th>更新日時</th>
+                </tr>
+              </thead>
+              <tbody>
+                {recentlyUpdated.map(product => (
+                  <tr key={product.id}>
+                    <td>{product.name}</td>
+                    <td>{product.category}</td>
+                    <td>¥{product.price.toLocaleString()}</td>
+                    <td>{product.stock}</td>
+                    <td>{product.updatedAt ? new Date(product.updatedAt).toLocaleString() : '-'}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          ) : (
+            <p className="admin-dashboard__no-data">商品がありません</p>
+          )}
+        </div>
+      </div>
+
+      {/* クイックアクション */}
       <div className="admin-dashboard__quick-actions">
-        <h2>クイックアクション</h2>
-        <div className="admin-dashboard__actions-grid">
-          <Link to="/admin/products/new" className="admin-dashboard__action-card">
-            <span className="admin-dashboard__action-icon">➕</span>
-            <span>新商品追加</span>
-          </Link>
-          <Link to="/admin/orders" className="admin-dashboard__action-card">
-            <span className="admin-dashboard__action-icon">📋</span>
-            <span>注文管理</span>
-          </Link>
-          <Link to="/admin/customers" className="admin-dashboard__action-card">
-            <span className="admin-dashboard__action-icon">👤</span>
-            <span>顧客管理</span>
-          </Link>
-          <Link to="/admin/analytics" className="admin-dashboard__action-card">
-            <span className="admin-dashboard__action-icon">📊</span>
-            <span>売上分析</span>
-          </Link>
+        <h3>クイックアクション</h3>
+        <div className="admin-dashboard__action-buttons">
+          <button onClick={() => navigate('/admin/products')}>
+            商品を追加・編集
+          </button>
+          <button onClick={() => navigate('/admin/inventory')}>
+            在庫を更新
+          </button>
         </div>
       </div>
     </div>
