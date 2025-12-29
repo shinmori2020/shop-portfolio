@@ -521,8 +521,10 @@ export const AdminInventory: React.FC = () => {
         <h1>在庫管理</h1>
         <div className="admin-inventory__actions">
           <div className="admin-inventory__nav">
-            <button onClick={() => navigate('/admin')}>ダッシュボードに戻る</button>
+            <button onClick={() => navigate('/admin')}>ダッシュボード</button>
             <button onClick={() => navigate('/admin/products')}>商品管理</button>
+            <button onClick={() => navigate('/admin/orders')}>注文管理</button>
+            <button onClick={() => navigate('/admin/contacts')}>問い合わせ管理</button>
           </div>
           <div className="admin-inventory__divider"></div>
           <div className="admin-inventory__page-actions">

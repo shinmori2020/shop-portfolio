@@ -28,6 +28,8 @@ import { AdminOrders } from './pages/admin/AdminOrders';
 import { AdminCustomers } from './pages/admin/AdminCustomers';
 import { AdminAnalytics } from './pages/admin/AdminAnalytics';
 import { AdminSettings } from './pages/admin/AdminSettings';
+import { AdminContacts } from './pages/admin/AdminContacts';
+import { AdminReviews } from './pages/admin/AdminReviews';
 import './App.css';
 
 function App() {
@@ -86,6 +88,8 @@ function App() {
                 <Route path="/admin/customers" element={<AdminCustomers />} />
                 <Route path="/admin/analytics" element={<AdminAnalytics />} />
                 <Route path="/admin/settings" element={<AdminSettings />} />
+                <Route path="/admin/contacts" element={<AdminContacts />} />
+                <Route path="/admin/reviews" element={<AdminReviews />} />
 
                 {/* 404 Not Found - must be last */}
                 <Route path="*" element={<NotFound />} />
