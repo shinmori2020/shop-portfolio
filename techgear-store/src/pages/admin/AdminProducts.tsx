@@ -45,6 +45,16 @@ export const AdminProducts: React.FC = () => {
   const [initializingStock, setInitializingStock] = useState(false);
   const [loadingSampleData, setLoadingSampleData] = useState(false);
 
+  // フィルター用のstate
+  const [searchTerm, setSearchTerm] = useState('');
+  const [categoryFilter, setCategoryFilter] = useState<string>('all');
+  const [stockFilter, setStockFilter] = useState<'all' | 'in_stock' | 'low_stock' | 'out_of_stock'>('all');
+  const [publishFilter, setPublishFilter] = useState<'all' | 'published' | 'draft'>('all');
+  const [priceMin, setPriceMin] = useState<string>('');
+  const [priceMax, setPriceMax] = useState<string>('');
+
+  const LOW_STOCK_THRESHOLD = 5;
+
   useEffect(() => {
     checkAdminAndLoadProducts();
   }, [user]);
@@ -373,6 +383,59 @@ export const AdminProducts: React.FC = () => {
     setImagePreview('');
   };
 
+  // カテゴリの一覧を取得
+  const categories = [...new Set(products.map(p => p.category).filter(Boolean))];
+
+  // フィルター適用
+  const filteredProducts = products.filter(product => {
+    // 検索条件
+    const matchesSearch = searchTerm === '' ||
+      product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      product.sku.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      product.description?.toLowerCase().includes(searchTerm.toLowerCase());
+
+    // カテゴリフィルター
+    const matchesCategory = categoryFilter === 'all' || product.category === categoryFilter;
+
+    // 在庫フィルター
+    let matchesStock = true;
+    if (stockFilter === 'out_of_stock') {
+      matchesStock = product.stock === 0;
+    } else if (stockFilter === 'low_stock') {
+      matchesStock = product.stock > 0 && product.stock <= LOW_STOCK_THRESHOLD;
+    } else if (stockFilter === 'in_stock') {
+      matchesStock = product.stock > LOW_STOCK_THRESHOLD;
+    }
+
+    // 公開状態フィルター
+    let matchesPublish = true;
+    if (publishFilter === 'published') {
+      matchesPublish = product.isPublished === true;
+    } else if (publishFilter === 'draft') {
+      matchesPublish = product.isPublished === false;
+    }
+
+    // 価格帯フィルター
+    const minPrice = priceMin ? Number(priceMin) : 0;
+    const maxPrice = priceMax ? Number(priceMax) : Infinity;
+    const matchesPrice = product.price >= minPrice && product.price <= maxPrice;
+
+    return matchesSearch && matchesCategory && matchesStock && matchesPublish && matchesPrice;
+  });
+
+  // フィルターをクリア
+  const clearFilters = () => {
+    setSearchTerm('');
+    setCategoryFilter('all');
+    setStockFilter('all');
+    setPublishFilter('all');
+    setPriceMin('');
+    setPriceMax('');
+  };
+
+  // フィルターが適用されているか
+  const hasActiveFilters = searchTerm !== '' || categoryFilter !== 'all' || stockFilter !== 'all' || publishFilter !== 'all' || priceMin !== '' || priceMax !== '';
+
   const openEditModal = (product: Product) => {
     setEditingProduct(product);
     setFormData({
@@ -432,6 +495,82 @@ export const AdminProducts: React.FC = () => {
         </div>
       </div>
 
+      {/* 検索・フィルター */}
+      <div className="admin-products__filters">
+        <div className="admin-products__filters-row">
+          <input
+            type="text"
+            placeholder="商品名、SKU、説明で検索..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="admin-products__search"
+          />
+          <select
+            value={categoryFilter}
+            onChange={(e) => setCategoryFilter(e.target.value)}
+            className="admin-products__filter-select"
+          >
+            <option value="all">すべてのカテゴリ</option>
+            {categories.map(cat => (
+              <option key={cat} value={cat}>{cat}</option>
+            ))}
+          </select>
+          <select
+            value={stockFilter}
+            onChange={(e) => setStockFilter(e.target.value as typeof stockFilter)}
+            className="admin-products__filter-select"
+          >
+            <option value="all">すべての在庫</option>
+            <option value="in_stock">在庫あり</option>
+            <option value="low_stock">在庫僅少 (5個以下)</option>
+            <option value="out_of_stock">在庫切れ</option>
+          </select>
+          <select
+            value={publishFilter}
+            onChange={(e) => setPublishFilter(e.target.value as typeof publishFilter)}
+            className="admin-products__filter-select"
+          >
+            <option value="all">すべての状態</option>
+            <option value="published">公開中</option>
+            <option value="draft">下書き</option>
+          </select>
+        </div>
+        <div className="admin-products__filters-row">
+          <div className="admin-products__price-range">
+            <span className="admin-products__price-label">価格帯:</span>
+            <input
+              type="number"
+              placeholder="最小"
+              value={priceMin}
+              onChange={(e) => setPriceMin(e.target.value)}
+              className="admin-products__price-input"
+              min="0"
+            />
+            <span className="admin-products__price-separator">〜</span>
+            <input
+              type="number"
+              placeholder="最大"
+              value={priceMax}
+              onChange={(e) => setPriceMax(e.target.value)}
+              className="admin-products__price-input"
+              min="0"
+            />
+            <span className="admin-products__price-unit">円</span>
+          </div>
+          {hasActiveFilters && (
+            <button
+              className="admin-products__clear-filters"
+              onClick={clearFilters}
+            >
+              フィルターをクリア
+            </button>
+          )}
+          <span className="admin-products__filter-result">
+            {filteredProducts.length} / {products.length} 件
+          </span>
+        </div>
+      </div>
+
       <div className="admin-products__list">
         <table className="admin-products__table">
           <thead>
@@ -447,7 +586,7 @@ export const AdminProducts: React.FC = () => {
             </tr>
           </thead>
           <tbody>
-            {products.map(product => (
+            {filteredProducts.map(product => (
               <tr key={product.id}>
                 <td>
                   {product.images?.[0] ? (
@@ -496,9 +635,9 @@ export const AdminProducts: React.FC = () => {
           </tbody>
         </table>
 
-        {products.length === 0 && (
+        {filteredProducts.length === 0 && (
           <div className="admin-products__empty">
-            商品が登録されていません
+            {hasActiveFilters ? '条件に一致する商品がありません' : '商品が登録されていません'}
           </div>
         )}
       </div>

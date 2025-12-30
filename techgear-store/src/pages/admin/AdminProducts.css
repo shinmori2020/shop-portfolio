@@ -86,6 +86,110 @@
   cursor: not-allowed;
 }
 
+/* フィルター */
+.admin-products__filters {
+  background: white;
+  border: 2px solid var(--color-border);
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.admin-products__filters-row {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.admin-products__filters-row:first-child {
+  margin-bottom: 1rem;
+}
+
+.admin-products__search {
+  flex: 1;
+  min-width: 200px;
+  max-width: 300px;
+  padding: 0.5rem 0.75rem;
+  border: 2px solid var(--color-border);
+  font-size: 0.875rem;
+}
+
+.admin-products__search:focus {
+  outline: none;
+  border-color: #0066cc;
+}
+
+.admin-products__filter-select {
+  padding: 0.5rem 0.75rem;
+  border: 2px solid var(--color-border);
+  font-size: 0.875rem;
+  background: white;
+  cursor: pointer;
+  min-width: 140px;
+}
+
+.admin-products__filter-select:focus {
+  outline: none;
+  border-color: #0066cc;
+}
+
+.admin-products__price-range {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.admin-products__price-label {
+  font-size: 0.875rem;
+  color: #666;
+  font-weight: 500;
+}
+
+.admin-products__price-input {
+  width: 100px;
+  padding: 0.5rem 0.75rem;
+  border: 2px solid var(--color-border);
+  font-size: 0.875rem;
+}
+
+.admin-products__price-input:focus {
+  outline: none;
+  border-color: #0066cc;
+}
+
+.admin-products__price-separator {
+  color: #666;
+}
+
+.admin-products__price-unit {
+  font-size: 0.875rem;
+  color: #666;
+}
+
+.admin-products__clear-filters {
+  padding: 0.5rem 1rem;
+  background: #f0f7ff;
+  color: #0066cc;
+  border: 1px solid #cce0ff;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.admin-products__clear-filters:hover {
+  background: #e0eefa;
+}
+
+.admin-products__filter-result {
+  font-size: 0.875rem;
+  color: #0066cc;
+  font-weight: 500;
+  padding: 0.5rem 1rem;
+  background: #f0f7ff;
+  border: 1px solid #cce0ff;
+  margin-left: auto;
+}
+
 .admin-products__list {
   background: white;
   border-radius: 0;
@@ -338,6 +442,7 @@
   background: #f0f7ff !important;
 }
 
+/* レスポンシブ - タブレット (768px以下: 2カラム) */
 @media (max-width: 768px) {
   .admin-products {
     padding: 1rem;
@@ -349,8 +454,78 @@
     gap: 1rem;
   }
 
+  .admin-products__header h1 {
+    font-size: 1.5rem;
+  }
+
+  /* ナビボタン: 2カラムグリッド */
   .admin-products__actions {
+    width: 100%;
+  }
+
+  .admin-products__nav {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.5rem;
+    width: 100%;
+  }
+
+  .admin-products__nav button {
+    width: 100%;
+    text-align: center;
+  }
+
+  .admin-products__divider {
+    display: none;
+  }
+
+  .admin-products__page-actions {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.5rem;
+    width: 100%;
+    margin-top: 0.5rem;
+  }
+
+  .admin-products__page-actions button {
+    width: 100%;
+    text-align: center;
+  }
+
+  /* フィルター: 2カラム */
+  .admin-products__filters-row {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+  }
+
+  .admin-products__search {
+    grid-column: 1 / -1;
+    max-width: none;
+  }
+
+  .admin-products__filter-select {
+    width: 100%;
+  }
+
+  .admin-products__price-range {
+    grid-column: 1 / -1;
     flex-wrap: wrap;
+  }
+
+  .admin-products__price-input {
+    flex: 1;
+    min-width: 80px;
+  }
+
+  .admin-products__clear-filters {
+    width: 100%;
+  }
+
+  .admin-products__filter-result {
+    grid-column: 1 / -1;
+    text-align: center;
+    margin-left: 0;
   }
 
   .admin-products__list {
@@ -373,5 +548,50 @@
 
   .admin-products__form-row {
     grid-template-columns: 1fr;
+  }
+
+  .admin-products__modal-actions {
+    flex-direction: column;
+  }
+
+  .admin-products__modal-actions button {
+    width: 100%;
+  }
+}
+
+/* レスポンシブ - スマートフォン (480px以下: 1カラム) */
+@media (max-width: 480px) {
+  .admin-products {
+    padding: 0.75rem;
+  }
+
+  .admin-products__header h1 {
+    font-size: 1.25rem;
+  }
+
+  /* ナビボタン: 1カラム */
+  .admin-products__nav {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-products__page-actions {
+    grid-template-columns: 1fr;
+  }
+
+  /* フィルター: 1カラム */
+  .admin-products__filters-row {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-products__filters {
+    padding: 0.75rem;
+  }
+
+  .admin-products__modal-content {
+    padding: 1rem;
+  }
+
+  .admin-products__modal-content h2 {
+    font-size: 1.25rem;
   }
 }

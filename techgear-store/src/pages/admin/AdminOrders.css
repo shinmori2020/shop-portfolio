@@ -143,6 +143,75 @@
   background: white;
 }
 
+/* 日付フィルター */
+.admin-orders__date-filters {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.admin-orders__date-quick {
+  display: flex;
+  gap: 0;
+  border: 2px solid #cce0ff;
+}
+
+.admin-orders__date-btn {
+  padding: 0.5rem 1rem;
+  background: #f0f7ff;
+  border: none;
+  font-size: 0.875rem;
+  color: #0066cc;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border-right: 1px solid #cce0ff;
+}
+
+.admin-orders__date-btn:last-child {
+  border-right: none;
+}
+
+.admin-orders__date-btn:hover {
+  background: #e0eefa;
+}
+
+.admin-orders__date-btn.active {
+  background: #0066cc;
+  color: white;
+}
+
+.admin-orders__date-range {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.admin-orders__date-input {
+  padding: 0.5rem 0.75rem;
+  border: 2px solid var(--color-border);
+  font-size: 0.875rem;
+}
+
+.admin-orders__date-input:focus {
+  outline: none;
+  border-color: #0066cc;
+}
+
+.admin-orders__date-separator {
+  color: #666;
+}
+
+.admin-orders__filter-result {
+  font-size: 0.875rem;
+  color: #0066cc;
+  font-weight: 500;
+  padding: 0.5rem 1rem;
+  background: #f0f7ff;
+  border: 1px solid #cce0ff;
+}
+
 /* 一覧 */
 .admin-orders__list {
   background: white;
@@ -576,7 +645,7 @@
   border-top: 2px solid var(--color-border);
 }
 
-/* レスポンシブ */
+/* レスポンシブ - タブレット (768px以下: 2カラム) */
 @media (max-width: 768px) {
   .admin-orders {
     padding: 1rem;
@@ -586,6 +655,86 @@
     flex-direction: column;
     align-items: flex-start;
     gap: 1rem;
+  }
+
+  .admin-orders__header h1 {
+    font-size: 1.5rem;
+  }
+
+  /* ナビボタン: 2カラムグリッド */
+  .admin-orders__actions {
+    width: 100%;
+  }
+
+  .admin-orders__nav {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.5rem;
+    width: 100%;
+  }
+
+  .admin-orders__nav button {
+    width: 100%;
+    text-align: center;
+  }
+
+  .admin-orders__divider {
+    display: none;
+  }
+
+  .admin-orders__page-actions {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.5rem;
+    width: 100%;
+    margin-top: 0.5rem;
+  }
+
+  .admin-orders__page-actions button {
+    width: 100%;
+    text-align: center;
+  }
+
+  /* サマリーカード: 2カラム */
+  .admin-orders__summary {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .admin-orders__summary-card {
+    padding: 1rem;
+  }
+
+  .admin-orders__summary-value {
+    font-size: 1.5rem;
+  }
+
+  /* 日付フィルター: 2カラム */
+  .admin-orders__date-quick {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    width: 100%;
+    border: none;
+    gap: 0.5rem;
+  }
+
+  .admin-orders__date-btn {
+    border: 2px solid #cce0ff;
+    border-right: 2px solid #cce0ff;
+  }
+
+  .admin-orders__date-range {
+    width: 100%;
+    flex-wrap: wrap;
+  }
+
+  .admin-orders__date-input {
+    flex: 1;
+    min-width: 120px;
+  }
+
+  .admin-orders__filter-result {
+    width: 100%;
+    text-align: center;
   }
 
   .admin-orders__filters {
@@ -606,7 +755,7 @@
   }
 
   .admin-orders__detail-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, 1fr);
   }
 
   .admin-orders__shipping-form {
@@ -615,12 +764,59 @@
   }
 
   .admin-orders__status-actions {
-    flex-direction: column;
-    align-items: stretch;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.5rem;
   }
 
   .admin-orders__btn {
     width: 100%;
     text-align: center;
+  }
+
+  .admin-orders__modal-actions {
+    flex-direction: column;
+  }
+}
+
+/* レスポンシブ - スマートフォン (480px以下: 1カラム) */
+@media (max-width: 480px) {
+  .admin-orders {
+    padding: 0.75rem;
+  }
+
+  .admin-orders__header h1 {
+    font-size: 1.25rem;
+  }
+
+  /* ナビボタン: 1カラム */
+  .admin-orders__nav {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-orders__page-actions {
+    grid-template-columns: 1fr;
+  }
+
+  /* サマリーカード: 1カラム */
+  .admin-orders__summary {
+    grid-template-columns: 1fr;
+  }
+
+  /* 日付フィルター: 1カラム */
+  .admin-orders__date-quick {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-orders__date-filters {
+    gap: 0.75rem;
+  }
+
+  .admin-orders__detail-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-orders__status-actions {
+    grid-template-columns: 1fr;
   }
 }

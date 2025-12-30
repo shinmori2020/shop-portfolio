@@ -73,7 +73,7 @@ interface Contact {
   createdAt: Date;
 }
 
-type TabType = 'overview' | 'inventory' | 'customer';
+type TabType = 'overview' | 'inventory' | 'orders' | 'analytics' | 'settings';
 
 export const AdminDashboard: React.FC = () => {
   const { user } = useAuth();
@@ -533,11 +533,10 @@ export const AdminDashboard: React.FC = () => {
           <div className="admin-dashboard__chart" style={{ height: '300px' }}>
             {salesChartData.some(d => d.sales > 0 || d.orders > 0) ? (
               <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={salesChartData}>
+                <LineChart data={salesChartData} margin={{ left: 10, right: 10 }}>
                   <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="date" />
-                  <YAxis yAxisId="left" />
-                  <YAxis yAxisId="right" orientation="right" />
+                  <XAxis dataKey="date" tick={{ fontSize: 12 }} />
+                  <YAxis hide />
                   <Tooltip
                     formatter={(value: number | string | Array<number | string> | undefined, name: string) => {
                       if (value === undefined) return '';
@@ -546,8 +545,8 @@ export const AdminDashboard: React.FC = () => {
                     }}
                   />
                   <Legend />
-                  <Line yAxisId="left" type="monotone" dataKey="sales" stroke="#0066cc" name="売上" strokeWidth={2} />
-                  <Line yAxisId="right" type="monotone" dataKey="orders" stroke="#004499" name="注文数" strokeWidth={2} />
+                  <Line type="monotone" dataKey="sales" stroke="#0066cc" name="売上" strokeWidth={2} />
+                  <Line type="monotone" dataKey="orders" stroke="#66b3ff" name="注文数" strokeWidth={2} />
                 </LineChart>
               </ResponsiveContainer>
             ) : (
@@ -606,13 +605,20 @@ export const AdminDashboard: React.FC = () => {
       <div className="admin-dashboard__charts">
         <div className="admin-dashboard__chart-card">
           <h3>カテゴリ別商品数</h3>
-          <div className="admin-dashboard__chart">
+          <div className="admin-dashboard__chart admin-dashboard__chart--bar">
             {categoryChartData.length > 0 ? (
-              <ResponsiveContainer width="100%" height={Math.max(150, categoryChartData.length * 40 + 50)}>
-                <BarChart data={categoryChartData} layout="vertical">
+              <ResponsiveContainer width="100%" height={250}>
+                <BarChart data={categoryChartData} margin={{ top: 20, right: 20, bottom: 60, left: 20 }}>
                   <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis type="number" />
-                  <YAxis dataKey="name" type="category" width={120} />
+                  <XAxis
+                    dataKey="name"
+                    tick={{ fontSize: 11 }}
+                    angle={-45}
+                    textAnchor="end"
+                    height={60}
+                    interval={0}
+                  />
+                  <YAxis tick={{ fontSize: 12 }} />
                   <Tooltip />
                   <Bar dataKey="count" fill="#0066cc" name="商品数" />
                 </BarChart>
@@ -625,17 +631,17 @@ export const AdminDashboard: React.FC = () => {
 
         <div className="admin-dashboard__chart-card">
           <h3>在庫状況</h3>
-          <div className="admin-dashboard__chart">
+          <div className="admin-dashboard__chart admin-dashboard__chart--pie">
             {stockStatusData.length > 0 ? (
               <ResponsiveContainer width="100%" height={300}>
                 <PieChart>
                   <Pie
                     data={stockStatusData}
                     cx="50%"
-                    cy="50%"
+                    cy="45%"
                     labelLine={false}
-                    label={({ name, percent }) => `${name} ${((percent || 0) * 100).toFixed(0)}%`}
-                    outerRadius={100}
+                    label={false}
+                    outerRadius={80}
                     fill="#8884d8"
                     dataKey="value"
                   >
@@ -650,7 +656,14 @@ export const AdminDashboard: React.FC = () => {
                     ))}
                   </Pie>
                   <Tooltip />
-                  <Legend />
+                  <Legend
+                    verticalAlign="bottom"
+                    height={36}
+                    formatter={(value: string, entry: { payload?: { value?: number } }) => {
+                      const data = entry.payload;
+                      return `${value}: ${data?.value || 0}件`;
+                    }}
+                  />
                 </PieChart>
               </ResponsiveContainer>
             ) : (
@@ -699,7 +712,7 @@ export const AdminDashboard: React.FC = () => {
         )}
 
         {popularProducts.length > 0 && (
-          <div className="admin-dashboard__list-card">
+          <div className="admin-dashboard__list-card admin-dashboard__list-card--full">
             <h3>人気商品ランキング</h3>
             <table className="admin-dashboard__table">
               <thead>
@@ -769,7 +782,7 @@ export const AdminDashboard: React.FC = () => {
         )}
 
         {recentlyUpdated.length > 0 && (
-          <div className="admin-dashboard__list-card">
+          <div className="admin-dashboard__list-card admin-dashboard__list-card--full">
             <h3>最近更新された商品</h3>
             <table className="admin-dashboard__table">
               <thead>
@@ -797,11 +810,21 @@ export const AdminDashboard: React.FC = () => {
     </>
   );
 
-  // タブコンテンツ: 顧客対応
-  const renderCustomerTab = () => (
+  // タブコンテンツ: 注文・顧客
+  const renderOrdersTab = () => (
     <>
-      {/* 問い合わせ・レビューKPIカード */}
+      {/* 注文・顧客KPIカード */}
       <div className="admin-dashboard__kpi">
+        <div className={`admin-dashboard__kpi-card admin-dashboard__kpi-card--warning ${orderStats.pending > 0 ? 'has-items' : ''}`}>
+          <h3>未処理注文</h3>
+          <p className="admin-dashboard__kpi-value">{orderStats.pending}</p>
+          <span className="admin-dashboard__kpi-sub">{orderStats.pending > 0 ? '要対応' : '問題なし'}</span>
+        </div>
+        <div className="admin-dashboard__kpi-card">
+          <h3>発送待ち</h3>
+          <p className="admin-dashboard__kpi-value">{orderStats.processing}</p>
+          <span className="admin-dashboard__kpi-sub">確認済み・処理中</span>
+        </div>
         <div className={`admin-dashboard__kpi-card admin-dashboard__kpi-card--warning ${contactStats.unanswered > 0 ? 'has-items' : ''}`}>
           <h3>未回答問い合わせ</h3>
           <p className="admin-dashboard__kpi-value">{contactStats.unanswered}</p>
@@ -811,16 +834,6 @@ export const AdminDashboard: React.FC = () => {
           <h3>対応中</h3>
           <p className="admin-dashboard__kpi-value">{contactStats.inProgress}</p>
           <span className="admin-dashboard__kpi-sub">問い合わせ対応中</span>
-        </div>
-        <div className={`admin-dashboard__kpi-card admin-dashboard__kpi-card--sales ${contactStats.completedToday > 0 ? 'has-items' : ''}`}>
-          <h3>今日の完了</h3>
-          <p className="admin-dashboard__kpi-value">{contactStats.completedToday}</p>
-          <span className="admin-dashboard__kpi-sub">問い合わせ完了</span>
-        </div>
-        <div className={`admin-dashboard__kpi-card admin-dashboard__kpi-card--caution ${reviews.filter(r => r.rating <= 2).length > 0 ? 'has-items' : ''}`}>
-          <h3>低評価レビュー</h3>
-          <p className="admin-dashboard__kpi-value">{reviews.filter(r => r.rating <= 2).length}</p>
-          <span className="admin-dashboard__kpi-sub">★2以下</span>
         </div>
       </div>
 
@@ -857,9 +870,133 @@ export const AdminDashboard: React.FC = () => {
         </div>
       </div>
 
-      {/* 最新レビュー & 最近の注文 */}
+      {/* 最近の注文 */}
       <div className="admin-dashboard__lists">
-        <div className="admin-dashboard__list-card">
+        <div className="admin-dashboard__list-card admin-dashboard__list-card--full">
+          <h3>最近の注文</h3>
+          {recentOrders.length > 0 ? (
+            <>
+              {/* テーブル表示（デスクトップ・タブレット用） */}
+              <table className="admin-dashboard__table admin-dashboard__orders-table">
+                <thead>
+                  <tr>
+                    <th>注文番号</th>
+                    <th>日時</th>
+                    <th>金額</th>
+                    <th>状態</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {recentOrders.map(order => (
+                    <tr key={order.id}>
+                      <td>{order.orderNumber}</td>
+                      <td>{new Date(order.createdAt).toLocaleDateString()}</td>
+                      <td>¥{order.total.toLocaleString()}</td>
+                      <td>
+                        <span className={`admin-dashboard__order-status admin-dashboard__order-status--${order.orderStatus}`}>
+                          {order.orderStatus === 'pending' && '未処理'}
+                          {order.orderStatus === 'confirmed' && '確認済'}
+                          {order.orderStatus === 'processing' && '処理中'}
+                          {order.orderStatus === 'shipped' && '発送済'}
+                          {order.orderStatus === 'delivered' && '配達完了'}
+                          {order.orderStatus === 'cancelled' && 'キャンセル'}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              {/* カード表示（モバイル用） */}
+              <div className="admin-dashboard__orders-cards">
+                {recentOrders.map(order => (
+                  <div key={order.id} className="admin-dashboard__order-card">
+                    <div className="admin-dashboard__order-card-header">
+                      <span className="admin-dashboard__order-card-number">{order.orderNumber}</span>
+                      <span className={`admin-dashboard__order-status admin-dashboard__order-status--${order.orderStatus}`}>
+                        {order.orderStatus === 'pending' && '未処理'}
+                        {order.orderStatus === 'confirmed' && '確認済'}
+                        {order.orderStatus === 'processing' && '処理中'}
+                        {order.orderStatus === 'shipped' && '発送済'}
+                        {order.orderStatus === 'delivered' && '配達完了'}
+                        {order.orderStatus === 'cancelled' && 'キャンセル'}
+                      </span>
+                    </div>
+                    <div className="admin-dashboard__order-card-body">
+                      <div className="admin-dashboard__order-card-row">
+                        <span className="admin-dashboard__order-card-label">日時</span>
+                        <span className="admin-dashboard__order-card-value">{new Date(order.createdAt).toLocaleDateString()}</span>
+                      </div>
+                      <div className="admin-dashboard__order-card-row">
+                        <span className="admin-dashboard__order-card-label">金額</span>
+                        <span className="admin-dashboard__order-card-value admin-dashboard__order-card-value--price">¥{order.total.toLocaleString()}</span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <button
+                className="admin-dashboard__view-all"
+                onClick={() => navigate('/admin/orders')}
+              >
+                注文管理へ
+              </button>
+            </>
+          ) : (
+            <p className="admin-dashboard__no-data">注文がありません</p>
+          )}
+        </div>
+      </div>
+
+      {/* クイックアクション */}
+      <div className="admin-dashboard__quick-actions">
+        <h3>注文・顧客機能</h3>
+        <div className="admin-dashboard__action-buttons">
+          <button onClick={() => navigate('/admin/orders')}>
+            注文管理
+          </button>
+          <button onClick={() => navigate('/admin/contacts')}>
+            問い合わせ管理
+          </button>
+          <button onClick={() => navigate('/admin/customers')}>
+            顧客管理
+          </button>
+        </div>
+      </div>
+    </>
+  );
+
+  // タブコンテンツ: 分析・レビュー
+  const renderAnalyticsTab = () => (
+    <>
+      {/* 分析KPIカード */}
+      <div className="admin-dashboard__kpi">
+        <div className="admin-dashboard__kpi-card">
+          <h3>今月の売上</h3>
+          <p className="admin-dashboard__kpi-value">¥{thisMonthSales.toLocaleString()}</p>
+          <span className="admin-dashboard__kpi-sub">
+            前月比: {monthOverMonthChange >= 0 ? '+' : ''}{monthOverMonthChange}%
+          </span>
+        </div>
+        <div className="admin-dashboard__kpi-card">
+          <h3>総注文数</h3>
+          <p className="admin-dashboard__kpi-value">{orders.filter(o => o.orderStatus !== 'cancelled').length}</p>
+          <span className="admin-dashboard__kpi-sub">キャンセル除く</span>
+        </div>
+        <div className="admin-dashboard__kpi-card">
+          <h3>総レビュー数</h3>
+          <p className="admin-dashboard__kpi-value">{reviews.length}</p>
+          <span className="admin-dashboard__kpi-sub">平均評価: ★{(reviews.length > 0 ? (reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length).toFixed(1) : '0.0')}</span>
+        </div>
+        <div className={`admin-dashboard__kpi-card admin-dashboard__kpi-card--warning ${reviews.filter(r => r.rating <= 2).length > 0 ? 'has-items' : ''}`}>
+          <h3>低評価レビュー</h3>
+          <p className="admin-dashboard__kpi-value">{reviews.filter(r => r.rating <= 2).length}</p>
+          <span className="admin-dashboard__kpi-sub">★2以下</span>
+        </div>
+      </div>
+
+      {/* レビュー一覧 */}
+      <div className="admin-dashboard__lists">
+        <div className="admin-dashboard__list-card admin-dashboard__list-card--full">
           <h3>最新レビュー</h3>
           {latestReviews.length > 0 ? (
             <>
@@ -891,57 +1028,61 @@ export const AdminDashboard: React.FC = () => {
                 className="admin-dashboard__view-all"
                 onClick={() => navigate('/admin/reviews')}
               >
-                すべてのレビューを見る
+                レビュー管理へ
               </button>
             </>
           ) : (
             <p className="admin-dashboard__no-data">レビューがありません</p>
           )}
         </div>
+      </div>
 
-        <div className="admin-dashboard__list-card">
-          <h3>最近の注文</h3>
-          {recentOrders.length > 0 ? (
-            <>
-              <table className="admin-dashboard__table">
-                <thead>
-                  <tr>
-                    <th>注文番号</th>
-                    <th>日時</th>
-                    <th>金額</th>
-                    <th>状態</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {recentOrders.map(order => (
-                    <tr key={order.id}>
-                      <td>{order.orderNumber}</td>
-                      <td>{new Date(order.createdAt).toLocaleDateString()}</td>
-                      <td>¥{order.total.toLocaleString()}</td>
-                      <td>
-                        <span className={`admin-dashboard__order-status admin-dashboard__order-status--${order.orderStatus}`}>
-                          {order.orderStatus === 'pending' && '未処理'}
-                          {order.orderStatus === 'confirmed' && '確認済'}
-                          {order.orderStatus === 'processing' && '処理中'}
-                          {order.orderStatus === 'shipped' && '発送済'}
-                          {order.orderStatus === 'delivered' && '配達完了'}
-                          {order.orderStatus === 'cancelled' && 'キャンセル'}
-                        </span>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-              <button
-                className="admin-dashboard__view-all"
-                onClick={() => navigate('/admin/orders')}
-              >
-                すべての注文を見る
-              </button>
-            </>
-          ) : (
-            <p className="admin-dashboard__no-data">注文がありません</p>
-          )}
+      {/* クイックアクション */}
+      <div className="admin-dashboard__quick-actions">
+        <h3>分析・レビュー機能</h3>
+        <div className="admin-dashboard__action-buttons admin-dashboard__analytics-buttons">
+          <button onClick={() => navigate('/admin/analytics')}>
+            詳細な売上分析
+          </button>
+          <button onClick={() => navigate('/admin/reviews')}>
+            レビュー管理
+          </button>
+        </div>
+      </div>
+    </>
+  );
+
+  // タブコンテンツ: 設定
+  const renderSettingsTab = () => (
+    <>
+      {/* 設定カテゴリ */}
+      <div className="admin-dashboard__settings-grid">
+        <div className="admin-dashboard__settings-card" onClick={() => navigate('/admin/settings')}>
+          <h3>サイト設定</h3>
+          <p>サイト名、ロゴ、基本情報の設定</p>
+        </div>
+        <div className="admin-dashboard__settings-card" onClick={() => navigate('/admin/settings')}>
+          <h3>配送設定</h3>
+          <p>配送方法、送料、配達地域の設定</p>
+        </div>
+        <div className="admin-dashboard__settings-card" onClick={() => navigate('/admin/settings')}>
+          <h3>決済設定</h3>
+          <p>決済方法、手数料の設定</p>
+        </div>
+        <div className="admin-dashboard__settings-card" onClick={() => navigate('/admin/settings')}>
+          <h3>メール設定</h3>
+          <p>自動送信メールのテンプレート設定</p>
+        </div>
+      </div>
+
+      {/* 開発中のお知らせ */}
+      <div className="admin-dashboard__quick-actions">
+        <h3>開発中</h3>
+        <p style={{ color: '#666', marginBottom: '1rem' }}>システム設定機能は現在開発中です。</p>
+        <div className="admin-dashboard__action-buttons admin-dashboard__settings-actions">
+          <button onClick={() => navigate('/admin/settings')}>
+            設定ページへ
+          </button>
         </div>
       </div>
     </>
@@ -971,13 +1112,25 @@ export const AdminDashboard: React.FC = () => {
           className={`admin-dashboard__tab ${activeTab === 'inventory' ? 'active' : ''}`}
           onClick={() => setActiveTab('inventory')}
         >
-          在庫・商品
+          商品・在庫
         </button>
         <button
-          className={`admin-dashboard__tab ${activeTab === 'customer' ? 'active' : ''}`}
-          onClick={() => setActiveTab('customer')}
+          className={`admin-dashboard__tab ${activeTab === 'orders' ? 'active' : ''}`}
+          onClick={() => setActiveTab('orders')}
         >
-          顧客対応
+          注文・顧客
+        </button>
+        <button
+          className={`admin-dashboard__tab ${activeTab === 'analytics' ? 'active' : ''}`}
+          onClick={() => setActiveTab('analytics')}
+        >
+          分析・レビュー
+        </button>
+        <button
+          className={`admin-dashboard__tab ${activeTab === 'settings' ? 'active' : ''}`}
+          onClick={() => setActiveTab('settings')}
+        >
+          設定
         </button>
       </div>
 
@@ -985,7 +1138,9 @@ export const AdminDashboard: React.FC = () => {
       <div className="admin-dashboard__tab-content">
         {activeTab === 'overview' && renderOverviewTab()}
         {activeTab === 'inventory' && renderInventoryTab()}
-        {activeTab === 'customer' && renderCustomerTab()}
+        {activeTab === 'orders' && renderOrdersTab()}
+        {activeTab === 'analytics' && renderAnalyticsTab()}
+        {activeTab === 'settings' && renderSettingsTab()}
       </div>
     </div>
   );

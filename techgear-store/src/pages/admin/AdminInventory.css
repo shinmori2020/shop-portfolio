@@ -367,7 +367,7 @@
   color: var(--color-text-secondary);
 }
 
-/* レスポンシブ */
+/* レスポンシブ - タブレット (768px以下: 2カラム) */
 @media (max-width: 768px) {
   .admin-inventory {
     padding: 1rem;
@@ -379,12 +379,79 @@
     gap: 1rem;
   }
 
-  .admin-inventory__actions {
-    flex-wrap: wrap;
+  .admin-inventory__header h1 {
+    font-size: 1.5rem;
   }
 
+  /* ナビボタン: 2カラムグリッド */
+  .admin-inventory__actions {
+    width: 100%;
+  }
+
+  .admin-inventory__nav {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.5rem;
+    width: 100%;
+  }
+
+  .admin-inventory__nav button {
+    width: 100%;
+    text-align: center;
+  }
+
+  .admin-inventory__divider {
+    display: none;
+  }
+
+  .admin-inventory__page-actions {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.5rem;
+    width: 100%;
+    margin-top: 0.5rem;
+  }
+
+  .admin-inventory__page-actions button,
+  .admin-inventory__csv-import {
+    width: 100%;
+    text-align: center;
+    justify-content: center;
+  }
+
+  /* サマリーカード: 2カラム */
+  .admin-inventory__summary {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .admin-inventory__summary-card {
+    padding: 1rem;
+  }
+
+  .admin-inventory__summary-card p {
+    font-size: 1.5rem;
+  }
+
+  /* フィルター: 2カラム */
   .admin-inventory__filters {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+  }
+
+  .admin-inventory__search {
+    grid-column: 1 / -1;
+  }
+
+  /* 一括操作: 縦並び */
+  .admin-inventory__bulk {
     flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+  }
+
+  .admin-inventory__bulk input {
+    width: 100%;
   }
 
   .admin-inventory__table-wrapper {
@@ -393,5 +460,47 @@
 
   .admin-inventory__table {
     min-width: 800px;
+  }
+
+  .admin-inventory__modal-actions {
+    flex-direction: column;
+  }
+
+  .admin-inventory__modal-actions button {
+    width: 100%;
+  }
+}
+
+/* レスポンシブ - スマートフォン (480px以下: 1カラム) */
+@media (max-width: 480px) {
+  .admin-inventory {
+    padding: 0.75rem;
+  }
+
+  .admin-inventory__header h1 {
+    font-size: 1.25rem;
+  }
+
+  /* ナビボタン: 1カラム */
+  .admin-inventory__nav {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-inventory__page-actions {
+    grid-template-columns: 1fr;
+  }
+
+  /* サマリーカード: 1カラム */
+  .admin-inventory__summary {
+    grid-template-columns: 1fr;
+  }
+
+  /* フィルター: 1カラム */
+  .admin-inventory__filters {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-inventory__modal-content {
+    padding: 1rem;
   }
 }

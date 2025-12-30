@@ -215,6 +215,10 @@ export const AdminReviews: React.FC = () => {
         <div className="admin-reviews__actions">
           <div className="admin-reviews__nav">
             <button onClick={() => navigate('/admin')}>ダッシュボード</button>
+            <button onClick={() => navigate('/admin/products')}>商品管理</button>
+            <button onClick={() => navigate('/admin/inventory')}>在庫管理</button>
+            <button onClick={() => navigate('/admin/orders')}>注文管理</button>
+            <button onClick={() => navigate('/admin/contacts')}>問い合わせ管理</button>
           </div>
           <div className="admin-reviews__divider" />
           <div className="admin-reviews__page-actions">

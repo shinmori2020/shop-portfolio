@@ -54,6 +54,9 @@ export const AdminOrders: React.FC = () => {
   const [isAdmin, setIsAdmin] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | Order['orderStatus']>('all');
+  const [dateFilter, setDateFilter] = useState<'all' | 'today' | 'week' | 'month' | 'custom'>('all');
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [trackingNumber, setTrackingNumber] = useState('');
@@ -148,6 +151,37 @@ export const AdminOrders: React.FC = () => {
     setShowDetailModal(true);
   };
 
+  // 日付フィルター用のヘルパー関数
+  const getDateRange = () => {
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+    switch (dateFilter) {
+      case 'today':
+        return { start: today, end: new Date(today.getTime() + 24 * 60 * 60 * 1000) };
+      case 'week': {
+        const weekStart = new Date(today);
+        weekStart.setDate(today.getDate() - 7);
+        return { start: weekStart, end: new Date(today.getTime() + 24 * 60 * 60 * 1000) };
+      }
+      case 'month': {
+        const monthStart = new Date(today);
+        monthStart.setDate(today.getDate() - 30);
+        return { start: monthStart, end: new Date(today.getTime() + 24 * 60 * 60 * 1000) };
+      }
+      case 'custom':
+        if (startDate && endDate) {
+          const start = new Date(startDate);
+          const end = new Date(endDate);
+          end.setHours(23, 59, 59, 999);
+          return { start, end };
+        }
+        return null;
+      default:
+        return null;
+    }
+  };
+
   const filteredOrders = orders.filter(order => {
     const matchesSearch = searchTerm === '' ||
       order.orderNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -156,7 +190,11 @@ export const AdminOrders: React.FC = () => {
 
     const matchesStatus = statusFilter === 'all' || order.orderStatus === statusFilter;
 
-    return matchesSearch && matchesStatus;
+    // 日付フィルター
+    const dateRange = getDateRange();
+    const matchesDate = !dateRange || (order.createdAt >= dateRange.start && order.createdAt <= dateRange.end);
+
+    return matchesSearch && matchesStatus && matchesDate;
   });
 
   const orderStats = {
@@ -304,6 +342,64 @@ export const AdminOrders: React.FC = () => {
           <option value="delivered">配達完了 ({orderStats.delivered})</option>
           <option value="cancelled">キャンセル ({orderStats.cancelled})</option>
         </select>
+      </div>
+
+      {/* 日付フィルター */}
+      <div className="admin-orders__date-filters">
+        <div className="admin-orders__date-quick">
+          <button
+            className={`admin-orders__date-btn ${dateFilter === 'all' ? 'active' : ''}`}
+            onClick={() => setDateFilter('all')}
+          >
+            すべて
+          </button>
+          <button
+            className={`admin-orders__date-btn ${dateFilter === 'today' ? 'active' : ''}`}
+            onClick={() => setDateFilter('today')}
+          >
+            今日
+          </button>
+          <button
+            className={`admin-orders__date-btn ${dateFilter === 'week' ? 'active' : ''}`}
+            onClick={() => setDateFilter('week')}
+          >
+            過去7日
+          </button>
+          <button
+            className={`admin-orders__date-btn ${dateFilter === 'month' ? 'active' : ''}`}
+            onClick={() => setDateFilter('month')}
+          >
+            過去30日
+          </button>
+          <button
+            className={`admin-orders__date-btn ${dateFilter === 'custom' ? 'active' : ''}`}
+            onClick={() => setDateFilter('custom')}
+          >
+            期間指定
+          </button>
+        </div>
+        {dateFilter === 'custom' && (
+          <div className="admin-orders__date-range">
+            <input
+              type="date"
+              value={startDate}
+              onChange={(e) => setStartDate(e.target.value)}
+              className="admin-orders__date-input"
+            />
+            <span className="admin-orders__date-separator">〜</span>
+            <input
+              type="date"
+              value={endDate}
+              onChange={(e) => setEndDate(e.target.value)}
+              className="admin-orders__date-input"
+            />
+          </div>
+        )}
+        {dateFilter !== 'all' && (
+          <span className="admin-orders__filter-result">
+            {filteredOrders.length}件の注文
+          </span>
+        )}
       </div>
 
       {/* 注文一覧 */}

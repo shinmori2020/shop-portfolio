@@ -388,7 +388,7 @@
   border-top: 2px solid var(--color-border);
 }
 
-/* レスポンシブ */
+/* レスポンシブ - タブレット (768px以下: 2カラム) */
 @media (max-width: 768px) {
   .admin-contacts {
     padding: 1rem;
@@ -398,6 +398,61 @@
     flex-direction: column;
     align-items: flex-start;
     gap: 1rem;
+  }
+
+  .admin-contacts__header h1 {
+    font-size: 1.5rem;
+  }
+
+  /* ナビボタン: 2カラムグリッド */
+  .admin-contacts__actions {
+    width: 100%;
+  }
+
+  .admin-contacts__nav {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.5rem;
+    width: 100%;
+  }
+
+  .admin-contacts__nav button {
+    width: 100%;
+    text-align: center;
+  }
+
+  .admin-contacts__divider {
+    display: none;
+  }
+
+  .admin-contacts__page-actions {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.5rem;
+    width: 100%;
+    margin-top: 0.5rem;
+  }
+
+  .admin-contacts__page-actions button {
+    width: 100%;
+    text-align: center;
+  }
+
+  /* サマリーカード: 2カラム */
+  .admin-contacts__summary {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .admin-contacts__summary-card {
+    padding: 1rem;
+  }
+
+  .admin-contacts__summary-value {
+    font-size: 1.5rem;
+  }
+
+  .admin-contacts__search {
+    max-width: none;
   }
 
   .admin-contacts__table {
@@ -421,5 +476,38 @@
   .admin-contacts__btn {
     width: 100%;
     text-align: center;
+  }
+}
+
+/* レスポンシブ - スマートフォン (480px以下: 1カラム) */
+@media (max-width: 480px) {
+  .admin-contacts {
+    padding: 0.75rem;
+  }
+
+  .admin-contacts__header h1 {
+    font-size: 1.25rem;
+  }
+
+  /* ナビボタン: 1カラム */
+  .admin-contacts__nav {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-contacts__page-actions {
+    grid-template-columns: 1fr;
+  }
+
+  /* サマリーカード: 1カラム */
+  .admin-contacts__summary {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-contacts__modal {
+    max-height: 95vh;
+  }
+
+  .admin-contacts__modal-content {
+    padding: 1rem;
   }
 }

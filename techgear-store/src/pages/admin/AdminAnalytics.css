@@ -1,0 +1,146 @@
+.admin-analytics {
+  padding: 2rem;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.admin-analytics__loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 400px;
+  font-size: 1.25rem;
+  color: var(--color-text-secondary);
+}
+
+.admin-analytics__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.admin-analytics__header h1 {
+  font-size: 2rem;
+  color: var(--color-text-primary);
+}
+
+.admin-analytics__actions {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.admin-analytics__nav {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.admin-analytics__nav button {
+  background: #0066cc;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.admin-analytics__nav button:hover {
+  background: #0052a3;
+}
+
+/* サマリーカード */
+.admin-analytics__summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.admin-analytics__summary-card {
+  background: #f0f7ff;
+  padding: 1.25rem;
+  border: 2px solid #cce0ff;
+  text-align: center;
+}
+
+.admin-analytics__summary-label {
+  display: block;
+  font-size: 0.875rem;
+  color: #666;
+  margin-bottom: 0.5rem;
+}
+
+.admin-analytics__summary-value {
+  display: block;
+  font-size: 2rem;
+  font-weight: bold;
+  color: #0066cc;
+}
+
+/* コンテンツ */
+.admin-analytics__content {
+  min-height: 200px;
+}
+
+.admin-analytics__notice {
+  background: white;
+  border: 2px solid var(--color-border);
+  padding: 1.5rem;
+}
+
+.admin-analytics__notice h3 {
+  font-size: 1.125rem;
+  color: var(--color-text-primary);
+  margin-bottom: 1rem;
+  font-weight: 600;
+}
+
+.admin-analytics__notice p {
+  margin: 0.5rem 0;
+  color: #666;
+}
+
+.admin-analytics__action-buttons {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-top: 1rem;
+}
+
+.admin-analytics__action-buttons button {
+  flex: 1;
+  min-width: 200px;
+  padding: 1rem 1.5rem;
+  background: #0066cc;
+  color: white;
+  border: none;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.admin-analytics__action-buttons button:hover {
+  background: #0052a3;
+}
+
+/* レスポンシブ */
+@media (max-width: 768px) {
+  .admin-analytics {
+    padding: 1rem;
+  }
+
+  .admin-analytics__header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .admin-analytics__nav {
+    flex-wrap: wrap;
+  }
+}

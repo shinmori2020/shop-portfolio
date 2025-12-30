@@ -95,13 +95,13 @@
 }
 
 .admin-reviews__summary-card--warning {
-  background: #fff5f5;
-  border-color: #ffcccc;
+  background: #f0f7ff;
+  border-color: #cce0ff;
 }
 
 .admin-reviews__summary-card--caution {
-  background: #fffbeb;
-  border-color: #ffeeba;
+  background: #f0f7ff;
+  border-color: #cce0ff;
 }
 
 .admin-reviews__summary-label {
@@ -119,15 +119,15 @@
 }
 
 .admin-reviews__summary-value--rating {
-  color: #f59e0b;
+  color: #0066cc;
 }
 
 .admin-reviews__summary-card--warning .admin-reviews__summary-value {
-  color: #dc3545;
+  color: #0066cc;
 }
 
 .admin-reviews__summary-card--caution .admin-reviews__summary-value {
-  color: #f59e0b;
+  color: #0066cc;
 }
 
 /* フィルター */

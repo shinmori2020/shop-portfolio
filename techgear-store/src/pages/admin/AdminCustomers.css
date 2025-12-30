@@ -1,0 +1,207 @@
+.admin-customers {
+  padding: 2rem;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.admin-customers__loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 400px;
+  font-size: 1.25rem;
+  color: var(--color-text-secondary);
+}
+
+.admin-customers__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.admin-customers__header h1 {
+  font-size: 2rem;
+  color: var(--color-text-primary);
+}
+
+.admin-customers__actions {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.admin-customers__nav {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.admin-customers__nav button {
+  background: #0066cc;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.admin-customers__nav button:hover {
+  background: #0052a3;
+}
+
+.admin-customers__divider {
+  width: 1px;
+  height: 24px;
+  background: #cce0ff;
+}
+
+.admin-customers__page-actions {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.admin-customers__page-actions button {
+  background: #0066cc;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.admin-customers__page-actions button:hover {
+  background: #0052a3;
+}
+
+/* サマリーカード */
+.admin-customers__summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.admin-customers__summary-card {
+  background: #f0f7ff;
+  padding: 1.25rem;
+  border: 2px solid #cce0ff;
+  text-align: center;
+}
+
+.admin-customers__summary-label {
+  display: block;
+  font-size: 0.875rem;
+  color: #666;
+  margin-bottom: 0.5rem;
+}
+
+.admin-customers__summary-value {
+  display: block;
+  font-size: 2rem;
+  font-weight: bold;
+  color: #0066cc;
+}
+
+/* フィルター */
+.admin-customers__filters {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.admin-customers__search {
+  flex: 1;
+  min-width: 200px;
+  max-width: 400px;
+  padding: 0.75rem 1rem;
+  border: 2px solid var(--color-border);
+  font-size: 1rem;
+}
+
+.admin-customers__search:focus {
+  outline: none;
+  border-color: #0066cc;
+}
+
+/* コンテンツ */
+.admin-customers__content {
+  min-height: 200px;
+}
+
+.admin-customers__notice {
+  background: white;
+  border: 2px solid var(--color-border);
+  padding: 1.5rem;
+}
+
+.admin-customers__notice h3 {
+  font-size: 1.125rem;
+  color: var(--color-text-primary);
+  margin-bottom: 1rem;
+  font-weight: 600;
+}
+
+.admin-customers__notice p {
+  margin: 0.5rem 0;
+  color: #666;
+}
+
+.admin-customers__action-buttons {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-top: 1rem;
+}
+
+.admin-customers__action-buttons button {
+  flex: 1;
+  min-width: 200px;
+  padding: 1rem 1.5rem;
+  background: #0066cc;
+  color: white;
+  border: none;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.admin-customers__action-buttons button:hover {
+  background: #0052a3;
+}
+
+/* レスポンシブ */
+@media (max-width: 768px) {
+  .admin-customers {
+    padding: 1rem;
+  }
+
+  .admin-customers__header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .admin-customers__actions {
+    flex-wrap: wrap;
+  }
+
+  .admin-customers__nav {
+    flex-wrap: wrap;
+  }
+
+  .admin-customers__filters {
+    flex-direction: column;
+  }
+
+  .admin-customers__search {
+    max-width: none;
+  }
+}
